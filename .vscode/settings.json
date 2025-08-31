@@ -1,4 +1,9 @@
 {
   "python-envs.defaultEnvManager": "ms-python.python:system",
-  "python-envs.pythonProjects": []
+  "python-envs.pythonProjects": [],
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#0F3049",
+    "titleBar.activeBackground": "#164366",
+    "titleBar.activeForeground": "#F8FBFE"
+  }
 }
