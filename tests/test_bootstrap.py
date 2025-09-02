@@ -1,10 +1,7 @@
-import importlib
 import os
-import types
-import tempfile
 import sys
 import types
-import pytest
+from assertpy import assert_that
 
 def test_bootstrap_idempotent(monkeypatch):
     # Patch environs.Env.read_env to track calls
@@ -38,28 +35,28 @@ def test_bootstrap_idempotent(monkeypatch):
 
     # First call should run everything
     bs.bootstrap()
-    assert called['env']
-    assert called['rich']
-    assert called['remove']
+    assert_that(called).contains('env')
+    assert_that(called).contains('rich')
+    assert_that(called).contains('remove')
     sink, level, fmt = called['add']
-    assert callable(sink), f"Expected sink to be callable, got {type(sink)}"
-    assert level == "DEBUG"
-    assert fmt == "fmt"
+    assert_that(callable(sink)).is_true()
+    assert_that(level).is_equal_to("DEBUG")
+    assert_that(fmt).is_equal_to("fmt")
 
     # Second call should do nothing
     called.clear()
     bs.bootstrap()
-    assert not called  # No new calls
+    assert_that(called).is_empty()
 
     # Force should re-run
     bs.bootstrap(force=True)
-    assert called['env']
-    assert called['rich']
-    assert called['remove']
+    assert_that(called).contains('env')
+    assert_that(called).contains('rich')
+    assert_that(called).contains('remove')
     sink, level, fmt = called['add']
-    assert callable(sink), f"Expected sink to be callable, got {type(sink)}"
-    assert level == "DEBUG"
-    assert fmt == "fmt"
+    assert_that(callable(sink)).is_true()
+    assert_that(level).is_equal_to("DEBUG")
+    assert_that(fmt).is_equal_to("fmt")
 
 import subprocess
 import sys
@@ -72,9 +69,9 @@ def test_bootstrap_env_read(tmp_path):
 
     # --- DO NOT FORMAT THIS BLOCK --- This script string must remain exactly as written for subprocess tests. fmt: off
     script = textwrap.dedent(f"""
-        import os os.chdir({repr(str(tmp_path))}) import sys sys.path.insert(0, {repr(os.path.abspath('src'))}) from
-        research_agent_framework.bootstrap import bootstrap bootstrap(force=True) from research_agent_framework.config import get_settings
-        print(get_settings(force_reload=True).model_name)
+import os os.chdir({repr(str(tmp_path))}) import sys sys.path.insert(0, {repr(os.path.abspath('src'))}) from
+research_agent_framework.bootstrap import bootstrap bootstrap(force=True) from research_agent_framework.config import get_settings
+print(get_settings(force_reload=True).model_name)
     """)
     # fmt: on
 
@@ -85,5 +82,5 @@ def test_bootstrap_env_read(tmp_path):
         text=True,
         env={**os.environ, "PYTHONPATH": os.path.abspath("src"), "ENV_PATH": str(env_path)},
     )
-    assert result.returncode == 0, f"Subprocess failed: {result.stderr}"
-    assert result.stdout.strip() == "from-env"
+    assert_that(result.returncode).is_equal_to(0)
+    assert_that(result.stdout.strip()).is_equal_to("from-env")
