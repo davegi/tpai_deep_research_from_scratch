@@ -54,12 +54,14 @@ Benefits:
 
 ## Tasks
 
-- [ ] 1. Create configuration and bootstrap
-  - [ ] 1.1 Add `src/research_agent_framework/config.py` with `Settings` using `pydantic-settings` and environment-driven fields.
-  - [ ] 1.2 Add `src/research_agent_framework/bootstrap.py` with `bootstrap()` that reads `.env` via `environs`, installs `rich.traceback`,
-    and configures `loguru`.
-  - [ ] 1.3 Add unit tests in `tests/test_bootstrap.py` verifying `bootstrap()` runs idempotently.
-  - [ ] 1.4 Record notebook/test updates required (notebook import path, environment bootstrap invocation).
+1. Create configuration and bootstrap
+
+   - [x] 1.1 Add `src/research_agent_framework/config.py` with `Settings` using `pydantic-settings` and environment-driven fields.
+     (implemented)
+   - [x] 1.2 Add `src/research_agent_framework/bootstrap.py` with `bootstrap()` that reads `.env` via `environs`, installs `rich.traceback`,
+     and configures `loguru`.
+   - [x] 1.3 Add unit tests in `tests/test_bootstrap.py` verifying `bootstrap()` runs idempotently.
+   - [x] 1.4 Record notebook/test updates required (notebook import path, environment bootstrap invocation).
 
 - [ ] 2. Models and validation
   - [ ] 2.1 Implement `src/research_agent_framework/models.py` with Pydantic v2 models: `Scope`, `ResearchTask`, `EvalResult`, `SerpResult`.

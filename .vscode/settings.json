@@ -4,8 +4,11 @@
 
   "cSpell.words": [
     "checkpointer",
+    "dataclasses",
     "dotenv",
+    "kernelspec",
     "loguru",
+    "pathlib",
     "Serp",
     "SERPAPI"
   ]
