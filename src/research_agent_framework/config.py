@@ -6,17 +6,51 @@ helper.
 Assumptions: - pydantic v2 is available in the environment used by tests. - Consumers will call `get_settings()` or instantiate `Settings()`
 directly.
 """
-from typing import Optional
 
+from typing import Optional
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from rich.console import Console
+
+# Import logging implementations from logging_impl for clarity and reuse
+from research_agent_framework.logging import (
+    LoggingProtocol,
+    LoguruLogger,
+    StdLogger,
+)
+
 
 
 class LoggingConfig(BaseModel):
     level: str = "INFO"
     fmt: str = "{time} {level} {message}"
+    # Holds a logger instance implementing LoggingProtocol
+    _logger_impl: Optional[LoggingProtocol] = None
 
-    model_config = SettingsConfigDict(populate_by_name=True)
+    def get_logger(self, backend: str = "loguru") -> LoggingProtocol:
+        if self._logger_impl is not None:
+            return self._logger_impl
+        if backend == "loguru":
+            self._logger_impl = LoguruLogger(level=self.level, fmt=self.fmt)
+        else:
+            self._logger_impl = StdLogger(level=self.level, fmt=self.fmt)
+        return self._logger_impl
+
+    def debug(self, msg, *args, **kwargs):
+        self.get_logger().debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self.get_logger().info(msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self.get_logger().warning(msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self.get_logger().error(msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self.get_logger().critical(msg, *args, **kwargs)
+
 
 
 class Settings(BaseSettings):
@@ -33,6 +67,9 @@ class Settings(BaseSettings):
 
     # Nested logging config
     logging: LoggingConfig = LoggingConfig()
+
+    # Optional runtime Console instance. Stored on settings so callers can reuse.
+    console: Optional[Console] = None
 
     # Additional flags
     enable_tracing: bool = False
@@ -58,3 +95,21 @@ def get_settings(force_reload: bool = False) -> Settings:
             importlib.reload(sys.modules["research_agent_framework.config"])
         _settings = Settings()
     return _settings
+
+
+def get_console(force_reload: bool = False) -> Console:
+    """Return a shared rich Console instance from settings, creating it if necessary."""
+    s = get_settings(force_reload=force_reload)
+    if s.console is None:
+        s.console = Console()
+    return s.console
+
+
+def get_logger(force_reload: bool = False, backend: str = "loguru") -> LoggingProtocol:
+    """Return a configured logger implementing LoggingProtocol based on the Settings.logging values.
+
+    By default, uses LoguruLogger. Set backend="std" to use StdLogger.
+    """
+    s = get_settings(force_reload=force_reload)
+    # Always return the logger from LoggingConfig
+    return s.logging.get_logger(backend=backend)

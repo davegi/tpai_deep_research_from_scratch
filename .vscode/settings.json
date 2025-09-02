@@ -3,6 +3,7 @@
   "python-envs.pythonProjects": [],
 
   "cSpell.words": [
+    "capsys",
     "checkpointer",
     "dataclasses",
     "dotenv",

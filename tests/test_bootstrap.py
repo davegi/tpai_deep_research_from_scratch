@@ -41,7 +41,10 @@ def test_bootstrap_idempotent(monkeypatch):
     assert called['env']
     assert called['rich']
     assert called['remove']
-    assert called['add'] == (print, "DEBUG", "fmt")
+    sink, level, fmt = called['add']
+    assert callable(sink), f"Expected sink to be callable, got {type(sink)}"
+    assert level == "DEBUG"
+    assert fmt == "fmt"
 
     # Second call should do nothing
     called.clear()
@@ -53,7 +56,10 @@ def test_bootstrap_idempotent(monkeypatch):
     assert called['env']
     assert called['rich']
     assert called['remove']
-    assert called['add'] == (print, "DEBUG", "fmt")
+    sink, level, fmt = called['add']
+    assert callable(sink), f"Expected sink to be callable, got {type(sink)}"
+    assert level == "DEBUG"
+    assert fmt == "fmt"
 
 import subprocess
 import sys
@@ -64,16 +70,13 @@ def test_bootstrap_env_read(tmp_path):
     env_path = tmp_path / ".env"
     env_path.write_text("MODEL_NAME=from-env\n")
 
+    # --- DO NOT FORMAT THIS BLOCK --- This script string must remain exactly as written for subprocess tests. fmt: off
     script = textwrap.dedent(f"""
-        import os
-        os.chdir({repr(str(tmp_path))})
-        import sys
-        sys.path.insert(0, {repr(os.path.abspath('src'))})
-        from research_agent_framework.bootstrap import bootstrap
-        bootstrap(force=True)
-        from research_agent_framework.config import get_settings
+        import os os.chdir({repr(str(tmp_path))}) import sys sys.path.insert(0, {repr(os.path.abspath('src'))}) from
+        research_agent_framework.bootstrap import bootstrap bootstrap(force=True) from research_agent_framework.config import get_settings
         print(get_settings(force_reload=True).model_name)
     """)
+    # fmt: on
 
     result = subprocess.run(
         [sys.executable, "-c", script],

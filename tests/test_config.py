@@ -54,13 +54,52 @@ def test_invalid_type_raises():
     assert raised
 
 
-def test_logging_property_returns_logging_config():
-    cfg = importlib.import_module("research_agent_framework.config")
-    s = cfg.Settings(logging=cfg.LoggingConfig(level="DEBUG", fmt="fmt"))
-    logging_cfg = s.logging
-    assert hasattr(logging_cfg, "level")
-    assert logging_cfg.level == "DEBUG"
-    assert logging_cfg.fmt == "fmt"
+
+# --- Logging Protocol Test Grouping ---
+import pytest
+
+class TestLoggingProtocol:
+    def test_logging_property_returns_logging_config(self):
+        cfg = importlib.import_module("research_agent_framework.config")
+        s = cfg.Settings(logging=cfg.LoggingConfig(level="DEBUG", fmt="fmt"))
+        logging_cfg = s.logging
+        assert hasattr(logging_cfg, "level")
+        assert logging_cfg.level == "DEBUG"
+        assert logging_cfg.fmt == "fmt"
+        # Test logger interface
+        logger = logging_cfg.get_logger()
+        assert hasattr(logger, "info")
+        assert hasattr(logger, "debug")
+        logger.info("test info message")
+        logger.debug("test debug message")
+
+    class TestLoguruLogger:
+        def test_loguru_logger_interface(self):
+            cfg = importlib.import_module("research_agent_framework.config")
+            LoguruLogger = cfg.LoguruLogger
+            logger = LoguruLogger(level="INFO", fmt="{message}")
+            assert logger.level == "INFO"
+            logger.level = "DEBUG"
+            assert logger.level == "DEBUG"
+            logger.info("info message")
+            logger.debug("debug message")
+            logger.warning("warning message")
+            logger.error("error message")
+            logger.critical("critical message")
+
+    class TestStdLogger:
+        def test_std_logger_interface(self):
+            cfg = importlib.import_module("research_agent_framework.config")
+            StdLogger = cfg.StdLogger
+            logger = StdLogger(level="INFO", fmt="%(message)s")
+            assert logger.level == "INFO"
+            logger.level = "WARNING"
+            assert logger.level == "WARNING"
+            logger.info("info message")
+            logger.debug("debug message")
+            logger.warning("warning message")
+            logger.error("error message")
+            logger.critical("critical message")
 
 
 def test_logging_env_nested(monkeypatch):
