@@ -76,11 +76,34 @@ Benefits:
   - [x] 3.3 Add `tests/test_renderer.py` to ensure missing variables raise errors and rendering succeeds with correct context.
   - [x] 3.4 Update notebook rendering examples and any tests that depend on template names/locations.
 
-- [ ] 4. LLM client and MockLLM
-  - [ ] 4.1 Create `src/research_agent_framework/llm/client.py` with an `LLMClient` Protocol (async `generate(prompt: str) -> str`) and
+- [x] 4. LLM client and MockLLM
+  - [x] 4.1 Create `src/research_agent_framework/llm/client.py` with an `LLMClient` Protocol (async `generate(prompt: str) -> str`) and
     `MockLLM`.
-  - [ ] 4.2 Add tests that use `MockLLM` for deterministic outputs.
-  - [ ] 4.3 Update integration examples in the notebook to import and use `MockLLM`.
+  - [x] 4.2 Add tests that use `MockLLM` for deterministic outputs.
+  - [x] 4.3 Update integration examples in the notebook to import and use `MockLLM`.
+
+- 4A. Property-Based and Edge Case Testing (PBT)
+
+  - [ ] 4A.1.1 Use Hypothesis to generate random valid/invalid data for Pydantic models (`Scope`, `ResearchTask`,   `EvalResult`,
+  - [x] 4A.1.1 Use Hypothesis to generate random valid/invalid data for Pydantic models (`Scope`, `ResearchTask`,   `EvalResult`,
+      `SerpResult`). `SerpResult`).
+  - [ ] 4A.1.2 Assert correct validation, error handling, and serialization/deserialization.
+  - [x] 4A.1.3 Update `tests/test_models.py` with PBTs and edge-case coverage. [COMPLETE]
+
+  - [ ] 4A.2 Add property-based tests for prompt renderer
+    - [ ] 4A.2.1 Use Hypothesis to generate random context dictionaries and template names.
+    - [ ] 4A.2.2 Assert rendering succeeds or fails as expected (e.g., missing keys raise errors).
+    - [ ] 4A.2.3 Update `tests/test_renderer.py` with PBTs and edge-case coverage.
+
+  - [ ] 4A.3 Add property-based tests for LLM client
+    - [ ] 4A.3.1 Use Hypothesis to generate random prompts and configs for `MockLLM`.
+    - [ ] 4A.3.2 Assert output is always a string and errors are handled gracefully.
+    - [ ] 4A.3.3 Update `tests/test_llm_mock.py` with PBTs and edge-case coverage.
+
+  - [ ] 4A.4 Update notebook and test documentation
+    - [ ] 4A.4.1 Record notebook/test updates required after adding PBTs.
+    - [ ] 4A.4.2 Ensure all new tests pass before proceeding to agent implementation.
+
 - [ ] 5. Agents
   - [ ] 5.1 Create `src/research_agent_framework/agents/base.py` defining `Agent` Protocol and `ResearchAgent` partial impl that accepts
     typed `context`.
