@@ -8,6 +8,7 @@ The function is idempotent and safe to call multiple times.
 import threading
 from typing import Optional
 
+from assertpy import assert_that
 from environs import Env
 from loguru import logger as _logger
 from rich import traceback as _rich_traceback
@@ -49,6 +50,7 @@ def bootstrap(force: bool = False) -> None:
         # Create a shared rich Console for the application (exported as `console`)
         c = Console()
         console = c
+        assert_that(console).is_not_none()
 
         # Configure loguru logger to write to the rich Console (preserving formatting)
         settings = get_settings()

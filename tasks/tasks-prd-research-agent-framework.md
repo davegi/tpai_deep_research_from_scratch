@@ -66,7 +66,7 @@ Benefits:
 - [ ] 2. Models and validation
   - [x] 2.1 Implement `src/research_agent_framework/models.py` with Pydantic v2 models: `Scope`, `ResearchTask`, `EvalResult`, `SerpResult`.
   - [x] 2.2 Add `tests/test_models.py` covering happy path and invalid inputs.
-  - [ ] 2.3 Update notebook cells that construct model instances and tests that import models.
+  - [x] 2.3 Update notebook cells that construct model instances and tests that import models.
 
 - [ ] 3. Prompt renderer
   - [ ] 3.1 Create `src/research_agent_framework/prompts/renderer.py` using Jinja2 `Environment` with `StrictUndefined` and a

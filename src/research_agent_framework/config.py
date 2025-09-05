@@ -20,7 +20,6 @@ from research_agent_framework.logging import (
 )
 
 
-
 class LoggingConfig(BaseModel):
     level: str = "INFO"
     fmt: str = "{time} {level} {message}"
@@ -34,6 +33,10 @@ class LoggingConfig(BaseModel):
             self._logger_impl = LoguruLogger(level=self.level, fmt=self.fmt)
         else:
             self._logger_impl = StdLogger(level=self.level, fmt=self.fmt)
+            
+        if self._logger_impl is None:
+            raise ValueError(f"Unsupported backend: {backend}. Supported backends are 'loguru' and 'std'.")
+          
         return self._logger_impl
 
     def debug(self, msg, *args, **kwargs):
@@ -50,7 +53,6 @@ class LoggingConfig(BaseModel):
 
     def critical(self, msg, *args, **kwargs):
         self.get_logger().critical(msg, *args, **kwargs)
-
 
 
 class Settings(BaseSettings):
@@ -71,10 +73,29 @@ class Settings(BaseSettings):
     # Optional runtime Console instance. Stored on settings so callers can reuse.
     console: Optional[Console] = None
 
+    # Optional logger instance (implements LoggingProtocol)
+    logger: Optional[LoggingProtocol] = None
+
     # Additional flags
     enable_tracing: bool = False
 
-    model_config = SettingsConfigDict(env_prefix="", frozen=False, arbitrary_types_allowed=True, extra="ignore", env_nested_delimiter="__")
+    model_config = SettingsConfigDict(
+        env_prefix="", 
+        frozen=False, 
+        arbitrary_types_allowed=True, 
+        extra="ignore", 
+        env_nested_delimiter="__"
+    )
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Ensure console is always initialized
+        if self.console is None:
+            self.console = Console()
+        # Ensure logger is always initialized
+        if self.logger is None:
+            self.logger = self.logging.get_logger()
+
 
 # simple module-level cache
 _settings: Optional[Settings] = None

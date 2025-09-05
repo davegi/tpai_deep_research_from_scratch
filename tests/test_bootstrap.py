@@ -67,10 +67,17 @@ def test_bootstrap_env_read(tmp_path):
     env_path = tmp_path / ".env"
     env_path.write_text("MODEL_NAME=from-env\n")
 
-    # --- DO NOT FORMAT THIS BLOCK --- This script string must remain exactly as written for subprocess tests. fmt: off
+    # --- DO NOT FORMAT THIS BLOCK --- This script string must remain exactly as written for subprocess tests.
+    # 
+    # fmt: off
     script = textwrap.dedent(f"""
-import os os.chdir({repr(str(tmp_path))}) import sys sys.path.insert(0, {repr(os.path.abspath('src'))}) from
-research_agent_framework.bootstrap import bootstrap bootstrap(force=True) from research_agent_framework.config import get_settings
+import os
+os.chdir({repr(str(tmp_path))})
+import sys
+sys.path.insert(0, {repr(os.path.abspath('src'))})
+from research_agent_framework.bootstrap import bootstrap
+bootstrap(force=True)
+from research_agent_framework.config import get_settings
 print(get_settings(force_reload=True).model_name)
     """)
     # fmt: on
