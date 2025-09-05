@@ -1,4 +1,6 @@
+
 import pytest
+from assertpy import assert_that
 from research_agent_framework.prompts import renderer
 from jinja2 import UndefinedError
 
@@ -9,7 +11,7 @@ from jinja2 import UndefinedError
 ])
 def test_render_template_success(template_name, context, expected_substr):
     result = renderer.render_template(template_name, context)
-    assert expected_substr in result
+    assert_that(result, f"Rendered template '{template_name}' should contain expected substring '{expected_substr}'.").contains(expected_substr)
 
 # Test StrictUndefined: missing variable raises
 @pytest.mark.parametrize("template_name,context", [
