@@ -39,10 +39,13 @@ def bootstrap(force: bool = False) -> None:
         env = Env()
         import os
         env_path = os.environ.get("ENV_PATH")
-        if env_path:
-            env.read_env(env_path)
-        else:
-            env.read_env()
+        try:
+            if env_path:
+                env.read_env(env_path)
+            else:
+                env.read_env()
+        except FileNotFoundError:
+            pass
 
         # Install rich traceback
         _rich_traceback.install()

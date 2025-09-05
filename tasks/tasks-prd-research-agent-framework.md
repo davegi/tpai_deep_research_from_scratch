@@ -84,25 +84,24 @@ Benefits:
 
 - 4A. Property-Based and Edge Case Testing (PBT)
 
-  - [ ] 4A.1.1 Use Hypothesis to generate random valid/invalid data for Pydantic models (`Scope`, `ResearchTask`,   `EvalResult`,
-  - [x] 4A.1.1 Use Hypothesis to generate random valid/invalid data for Pydantic models (`Scope`, `ResearchTask`,   `EvalResult`,
-      `SerpResult`). `SerpResult`).
-  - [ ] 4A.1.2 Assert correct validation, error handling, and serialization/deserialization.
+  - [x] 4A.1.1 Use Hypothesis to generate random valid/invalid data for Pydantic models (`Scope`, `ResearchTask`, `EvalResult`,
+    `SerpResult`).
+  - [x] 4A.1.2 Assert correct validation, error handling, and serialization/deserialization. [COMPLETE]
   - [x] 4A.1.3 Update `tests/test_models.py` with PBTs and edge-case coverage. [COMPLETE]
 
-  - [ ] 4A.2 Add property-based tests for prompt renderer
-    - [ ] 4A.2.1 Use Hypothesis to generate random context dictionaries and template names.
-    - [ ] 4A.2.2 Assert rendering succeeds or fails as expected (e.g., missing keys raise errors).
-    - [ ] 4A.2.3 Update `tests/test_renderer.py` with PBTs and edge-case coverage.
+  - [x] 4A.2 Add property-based tests for prompt renderer
+    - [x] 4A.2.1 Use Hypothesis to generate random context dictionaries and template names. [COMPLETE]
+    - [x] 4A.2.2 Assert rendering succeeds or fails as expected (e.g., missing keys raise errors). [COMPLETE]
+    - [x] 4A.2.3 Update `tests/test_renderer.py` with PBTs and edge-case coverage. [COMPLETE]
 
-  - [ ] 4A.3 Add property-based tests for LLM client
-    - [ ] 4A.3.1 Use Hypothesis to generate random prompts and configs for `MockLLM`.
-    - [ ] 4A.3.2 Assert output is always a string and errors are handled gracefully.
-    - [ ] 4A.3.3 Update `tests/test_llm_mock.py` with PBTs and edge-case coverage.
+  - [x] 4A.3 Add property-based tests for LLM client
+    - [x] 4A.3.1 Use Hypothesis to generate random prompts and configs for `MockLLM`. [COMPLETE]
+    - [x] 4A.3.2 Assert output is always a string and errors are handled gracefully. [COMPLETE]
+    - [x] 4A.3.3 Update `tests/test_llm_mock.py` with PBTs and edge-case coverage. [COMPLETE]
 
-  - [ ] 4A.4 Update notebook and test documentation
-    - [ ] 4A.4.1 Record notebook/test updates required after adding PBTs.
-    - [ ] 4A.4.2 Ensure all new tests pass before proceeding to agent implementation.
+  - [x] 4A.4 Update notebook and test documentation
+    - [x] 4A.4.1 Record notebook/test updates required after adding PBTs. [COMPLETE]
+    - [x] 4A.4.2 Ensure all new tests pass before proceeding to agent implementation. [COMPLETE]
 
 - [ ] 5. Agents
   - [ ] 5.1 Create `src/research_agent_framework/agents/base.py` defining `Agent` Protocol and `ResearchAgent` partial impl that accepts
@@ -166,6 +165,10 @@ Benefits:
 - `research_agent_framework/mcp/stub.py` — lightweight in-process MCP stub
 - `notebooks/0_consolidated_research_agent.ipynb` — demo notebook (skeleton + per-task cells)
 - `tests/test_config.py`, `tests/test_bootstrap.py`, `tests/test_models.py`, `tests/test_renderer.py`, `tests/test_llm_mock.py`,
+`tests/test_config.py` - Test ensuring config settings, error handling, and logger backend coverage. Now includes property-based and edge-case tests for all branches and error handling.
+`tests/test_bootstrap.py` - Test ensuring `bootstrap()` reads env and configures logging without raising. Now includes property-based and edge-case tests for all branches and error handling.
+`tests/test_logging.py` - Test ensuring logger classes, property setters/getters, and error handling. Now includes property-based and edge-case tests for all branches and error handling.
+`tests/test_models.py`, `tests/test_renderer.py`, `tests/test_llm_mock.py`,
   `tests/test_research_agent.py`, `tests/test_adapters.py`, `tests/test_integration_mock_stack.py`
 
 ### Notes on testing strategy and gating

@@ -56,8 +56,9 @@ def test_invalid_type_raises():
 
 
 
-# --- Logging Protocol Test Grouping ---
+
 import pytest
+from hypothesis import given, strategies as st
 
 class TestLoggingProtocol:
     def test_logging_property_returns_logging_config(self):
@@ -73,6 +74,29 @@ class TestLoggingProtocol:
         assert_that(hasattr(logger, "debug")).is_true()
         logger.info("test info message")
         logger.debug("test debug message")
+
+    def test_logger_backend_std(self):
+        cfg = importlib.import_module("research_agent_framework.config")
+        logging_cfg = cfg.LoggingConfig(level="INFO", fmt="fmt")
+        logger = logging_cfg.get_logger(backend="std")
+        assert_that(logger).is_instance_of(cfg.StdLogger)
+        logger.info("info std")
+
+    def test_logger_backend_invalid(self):
+        cfg = importlib.import_module("research_agent_framework.config")
+        logging_cfg = cfg.LoggingConfig(level="INFO", fmt="fmt")
+        with pytest.raises(ValueError):
+            logging_cfg.get_logger(backend="invalid")
+
+    def test_logging_methods(self):
+        cfg = importlib.import_module("research_agent_framework.config")
+        logging_cfg = cfg.LoggingConfig(level="INFO", fmt="fmt")
+        logger = logging_cfg.get_logger()
+        logging_cfg.debug("debug")
+        logging_cfg.info("info")
+        logging_cfg.warning("warning")
+        logging_cfg.error("error")
+        logging_cfg.critical("critical")
 
     class TestLoguruLogger:
         def test_loguru_logger_interface(self):
@@ -101,6 +125,40 @@ class TestLoggingProtocol:
             logger.warning("warning message")
             logger.error("error message")
             logger.critical("critical message")
+
+def test_settings_console_and_logger_init():
+    cfg = importlib.import_module("research_agent_framework.config")
+    s = cfg.Settings()
+    assert_that(s.console).is_not_none()
+    assert_that(s.logger).is_not_none()
+
+def test_get_console_and_logger():
+    cfg = importlib.import_module("research_agent_framework.config")
+    console = cfg.get_console()
+    assert_that(console).is_not_none()
+    logger = cfg.get_logger()
+    assert_that(logger).is_not_none()
+    std_logger = cfg.get_logger(backend="std")
+    assert_that(std_logger).is_not_none()
+
+def test_get_logger_invalid_backend():
+    cfg = importlib.import_module("research_agent_framework.config")
+    with pytest.raises(ValueError):
+        cfg.get_logger(backend="invalid")
+
+# Property-based tests for Settings
+@given(
+    model_name=st.text(min_size=1, max_size=20),
+    model_temperature=st.floats(min_value=0.0, max_value=2.0),
+    enable_tracing=st.booleans()
+)
+def test_settings_property_valid(model_name, model_temperature, enable_tracing):
+    import importlib
+    cfg = importlib.import_module("research_agent_framework.config")
+    s = cfg.Settings(model_name=model_name, model_temperature=model_temperature, enable_tracing=enable_tracing)
+    assert_that(s.model_name).is_equal_to(model_name)
+    assert_that(s.model_temperature).is_close_to(model_temperature, 1e-6)
+    assert_that(s.enable_tracing).is_equal_to(enable_tracing)
 
 
 def test_logging_env_nested(monkeypatch):

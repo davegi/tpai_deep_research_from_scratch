@@ -31,12 +31,10 @@ class LoggingConfig(BaseModel):
             return self._logger_impl
         if backend == "loguru":
             self._logger_impl = LoguruLogger(level=self.level, fmt=self.fmt)
-        else:
+        elif backend == "std":
             self._logger_impl = StdLogger(level=self.level, fmt=self.fmt)
-            
-        if self._logger_impl is None:
+        else:
             raise ValueError(f"Unsupported backend: {backend}. Supported backends are 'loguru' and 'std'.")
-          
         return self._logger_impl
 
     def debug(self, msg, *args, **kwargs):
@@ -129,8 +127,9 @@ def get_console(force_reload: bool = False) -> Console:
 def get_logger(force_reload: bool = False, backend: str = "loguru") -> LoggingProtocol:
     """Return a configured logger implementing LoggingProtocol based on the Settings.logging values.
 
-    By default, uses LoguruLogger. Set backend="std" to use StdLogger.
+    By default, uses LoguruLogger. Set backend="std" to use StdLogger. Raises ValueError for unsupported backends.
     """
     s = get_settings(force_reload=force_reload)
-    # Always return the logger from LoggingConfig
+    if backend not in ("loguru", "std"):
+        raise ValueError(f"Unsupported backend: {backend}. Supported backends are 'loguru' and 'std'.")
     return s.logging.get_logger(backend=backend)
