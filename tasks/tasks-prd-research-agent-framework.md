@@ -69,12 +69,12 @@ Benefits:
   - [x] 2.3 Update notebook cells that construct model instances and tests that import models.
 
 - [ ] 3. Prompt renderer
-  - [ ] 3.1 Create `src/research_agent_framework/prompts/renderer.py` using Jinja2 `Environment` with `StrictUndefined` and a
+  - [x] 3.1 Create `src/research_agent_framework/prompts/renderer.py` using Jinja2 `Environment` with `StrictUndefined` and a
     `render_template` helper.
-  - [ ] 3.2 Add example templates in `src/research_agent_framework/prompts/templates/` derived from
+  - [x] 3.2 Add example templates in `src/research_agent_framework/prompts/templates/` derived from
     `src/deep_research_from_scratch/prompts.py`.
-  - [ ] 3.3 Add `tests/test_renderer.py` to ensure missing variables raise errors and rendering succeeds with correct context.
-  - [ ] 3.4 Update notebook rendering examples and any tests that depend on template names/locations.
+  - [x] 3.3 Add `tests/test_renderer.py` to ensure missing variables raise errors and rendering succeeds with correct context.
+  - [x] 3.4 Update notebook rendering examples and any tests that depend on template names/locations.
 
 - [ ] 4. LLM client and MockLLM
   - [ ] 4.1 Create `src/research_agent_framework/llm/client.py` with an `LLMClient` Protocol (async `generate(prompt: str) -> str`) and
