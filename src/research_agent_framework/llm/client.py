@@ -1,4 +1,4 @@
-from typing import Protocol, Any, Dict, List, Optional
+from typing import Protocol, Any, Dict, List, Optional, Type
 from pydantic import BaseModel, Field
 
 # --- Config Protocol ---
@@ -62,6 +62,15 @@ class LLMClient(Protocol):
     async def generate(self, prompt: str, **kwargs) -> str:
         ...
 
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        """Model-in / model-out generation.
+
+        Default contract: take a Pydantic input model and produce a Pydantic output
+        model instance. Implementations should provide this for deterministic
+        model-driven tools; fallback to string-based `generate` where needed.
+        """
+        ...
+
 # --- Client Implementations ---
 class OpenAIClient:
     def __init__(self, config: OpenAIConfig):
@@ -70,6 +79,12 @@ class OpenAIClient:
         # TODO: Implement OpenAI API call
         return "openai response"
 
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
+
 class AnthropicClient:
     def __init__(self, config: AnthropicConfig):
         self.config = config
@@ -77,11 +92,44 @@ class AnthropicClient:
         # TODO: Implement Anthropic API call
         return "anthropic response"
 
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
+
 class MockLLM:
     def __init__(self, config: LLMConfig):
         self.config = config
     async def generate(self, prompt: str, **kwargs) -> str:
         return f"mock response for: {prompt}"
+
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        # Simple deterministic mapping for testing: when asked to produce an
+        # EvalResult from a ResearchTask-like input, create a constructed
+        # EvalResult with feedback containing a mock response.
+        try:
+            # Best-effort extraction if input_model has `id` and `query` fields
+            task_id = getattr(input_model, "id", None)
+            prompt = getattr(input_model, "query", str(input_model))
+        except Exception:
+            task_id = None
+            prompt = str(input_model)
+
+        feedback = f"mock response for: {prompt}"
+
+        # If the desired output model is EvalResult, construct it directly to
+        # preserve types used across the codebase.
+        from research_agent_framework.models import EvalResult
+
+        if output_model is EvalResult or getattr(output_model, "__name__", "") == "EvalResult":
+            return EvalResult(task_id=task_id or "unknown", success=True, score=min(1.0, len(feedback) / 100.0), feedback=feedback, details={})
+
+        # Generic fallback: try to parse a dict into the requested Pydantic model
+        data = {"feedback": feedback}
+        if task_id is not None:
+            data.setdefault("task_id", task_id)
+        return output_model.model_validate(data)
 
 # Stubs for other providers
 class GeminiClient:
@@ -90,11 +138,23 @@ class GeminiClient:
     async def generate(self, prompt: str, **kwargs) -> str:
         raise NotImplementedError("GeminiClient not implemented yet.")
 
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
+
 class CohereClient:
     def __init__(self, config: CohereConfig):
         self.config = config
     async def generate(self, prompt: str, **kwargs) -> str:
         raise NotImplementedError("CohereClient not implemented yet.")
+
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
 
 class MistralClient:
     def __init__(self, config: MistralConfig):
@@ -102,11 +162,23 @@ class MistralClient:
     async def generate(self, prompt: str, **kwargs) -> str:
         raise NotImplementedError("MistralClient not implemented yet.")
 
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
+
 class CopilotClient:
     def __init__(self, config: CopilotConfig):
         self.config = config
     async def generate(self, prompt: str, **kwargs) -> str:
         raise NotImplementedError("CopilotClient not implemented yet.")
+
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
 
 class HuggingFaceClient:
     def __init__(self, config: HuggingFaceConfig):
@@ -114,11 +186,23 @@ class HuggingFaceClient:
     async def generate(self, prompt: str, **kwargs) -> str:
         raise NotImplementedError("HuggingFaceClient not implemented yet.")
 
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
+
 class AzureOpenAIClient:
     def __init__(self, config: AzureOpenAIConfig):
         self.config = config
     async def generate(self, prompt: str, **kwargs) -> str:
         raise NotImplementedError("AzureOpenAIClient not implemented yet.")
+
+    async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:
+        prompt = getattr(input_model, "query", str(input_model))
+        text = await self.generate(prompt, **kwargs)
+        data = {"feedback": text, "task_id": getattr(input_model, "id", None)}
+        return output_model.model_validate(data)
 
 # --- Factory ---
 def llm_factory(provider: str, config: LLMConfig) -> LLMClient:
