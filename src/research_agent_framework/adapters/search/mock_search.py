@@ -1,17 +1,26 @@
-from typing import List
+from typing import List, Union
 
 from pydantic import TypeAdapter, HttpUrl
 
 from research_agent_framework.models import SerpResult
+from research_agent_framework.adapters.search.schema import SerpRequest, SerpReply, ReplyMeta
 
 
 class MockSearchAdapter:
     """Deterministic mock search adapter returning canned SerpResult items.
 
     Intended for unit and integration tests where network access is not allowed.
+    Supports the new `SerpRequest`/`SerpReply` contract while keeping a
+    backward-compatible `search(q: str)` shim.
     """
 
-    async def search(self, q: str, **kwargs) -> List[SerpResult]:
+    async def search(self, request: Union[str, SerpRequest], **kwargs) -> Union[List[SerpResult], SerpReply]:
+        # Accept either a raw query string (back-compat) or a SerpRequest.
+        # For backwards compatibility, if called with a `str` return a list
+        # of `SerpResult`. If called with `SerpRequest`, return a `SerpReply`.
+        is_back_compat = isinstance(request, str)
+        q = request if is_back_compat else request.query
+
         # Validate urls as HttpUrl to satisfy SerpResult type
         url_adapter = TypeAdapter(HttpUrl)
         url1 = url_adapter.validate_python("https://coffee.example.com/a")
@@ -29,4 +38,9 @@ class MockSearchAdapter:
             snippet="Excellent pastries",
             raw={"q": q, "source": "mock", "id": 2},
         )
-        return [r1, r2]
+
+        if is_back_compat:
+            return [r1, r2]
+        reply = SerpReply(results=[r1, r2], meta=ReplyMeta(provider="mock", total_results=2))
+        return reply
+

@@ -70,15 +70,15 @@ Benefits:
   - [x] 1.3 Add unit tests in `tests/test_bootstrap.py` verifying `bootstrap()` runs idempotently.
   - [x] 1.4 Record notebook/test updates required (notebook import path, environment bootstrap invocation).
     - Notebook cells for sys.path and bootstrap are present; tests for config/bootstrap pass. Ready for next phase.
-    - [ ] 1.5 Update notebook demo cells to explicitly import and use the deterministic `MockSearchAdapter` and `MockLLM` when available so
-      demo cells are reproducible.
+  - [x] 1.5 Update notebook demo cells to explicitly import and use the deterministic `MockSearchAdapter` and `MockLLM` when available so
+    demo cells are reproducible.
 
 - [ ] 2. Models and validation
   - [x] 2.1 Implement `src/research_agent_framework/models.py` with Pydantic v2 models: `Scope`, `ResearchTask`, `EvalResult`, `SerpResult`.
   - [x] 2.2 Add `tests/test_models.py` covering happy path and invalid inputs.
   - [x] 2.3 Update notebook cells that construct model instances and tests that import models.
 
-- [ ] 3. Prompt renderer
+- [x] 3. Prompt renderer
   - [x] 3.1 Create `src/research_agent_framework/prompts/renderer.py` using Jinja2 `Environment` with `StrictUndefined` and a
     `render_template` helper.
   - [x] 3.2 Add example templates in `src/research_agent_framework/prompts/templates/` derived from
@@ -148,7 +148,7 @@ Benefits:
     - [ ] Add at least one example scoring implementation and unit tests
 
   - [ ] 5.4 Define a unified `Location` Pydantic model/interface in `src/research_agent_framework/models.py`
-    - [ ] Fields for address, lat/lon, name, etc.
+    - [ ] .Fields for address, lat/lon, name, etc.
     - [ ] Ensure adapters (LLM, SerpAPI, Tavily) can return/consume this model
     - [ ] Add unit tests for model validation and edge cases
 
