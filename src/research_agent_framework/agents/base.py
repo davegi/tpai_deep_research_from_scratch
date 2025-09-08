@@ -1,4 +1,4 @@
-from typing import Protocol, runtime_checkable, List, Dict, Any, Optional
+from typing import Protocol, runtime_checkable, List, Dict, Any, Optional, TypedDict
 from uuid import uuid4
 
 from research_agent_framework.models import Scope, ResearchTask, EvalResult
@@ -70,3 +70,22 @@ class ResearchAgent:
 		output = await self.llm.generate(prompt)
 		score = min(1.0, max(0.0, len(output) / 100.0))
 		return EvalResult(task_id=task.id, success=True, score=score, feedback=output, details={"prompt": prompt})
+
+
+# ------------------------- Scoring protocol -------------------------
+class ScoreResult(TypedDict):
+	score: float
+	reason: str
+	meta: Dict[str, Any]
+
+
+@runtime_checkable
+class ScoringProtocol(Protocol):
+	"""Protocol for scoring items (SerpResult or Location).
+
+	Implementations should return a ScoreResult mapping with a normalized
+	`score` in [0.0, 1.0].
+	"""
+
+	def score(self, item: Any, preferences: Optional[Dict[str, Any]] = None) -> ScoreResult:
+		raise NotImplementedError()

@@ -44,3 +44,13 @@ class MockSearchAdapter:
         reply = SerpReply(results=[r1, r2], meta=ReplyMeta(provider="mock", total_results=2))
         return reply
 
+        @classmethod
+        def from_raw(cls, raw: dict) -> 'MockSearchAdapter':
+            """Factory to construct a MockSearchAdapter from a raw provider payload.
+
+            For the mock adapter this simply returns an instance — the important
+            contract is that adapters expose `from_raw` for consistency with real
+            adapters which may need to normalize fields and preserve `raw`.
+            """
+            return cls()
+
