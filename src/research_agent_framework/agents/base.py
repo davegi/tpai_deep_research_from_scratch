@@ -1,4 +1,5 @@
-from typing import Protocol, runtime_checkable, List, Dict, Any, Optional, TypedDict
+from typing import Protocol, runtime_checkable, List, Dict, Any, Optional
+from pydantic import BaseModel
 from uuid import uuid4
 
 from research_agent_framework.models import Scope, ResearchTask, EvalResult
@@ -73,17 +74,17 @@ class ResearchAgent:
 
 
 # ------------------------- Scoring protocol -------------------------
-class ScoreResult(TypedDict):
+class ScoreResult(BaseModel):
 	score: float
-	reason: str
-	meta: Dict[str, Any]
+	reason: str = ""
+	meta: Dict[str, Any] = {}
 
 
 @runtime_checkable
 class ScoringProtocol(Protocol):
 	"""Protocol for scoring items (SerpResult or Location).
 
-	Implementations should return a ScoreResult mapping with a normalized
+	Implementations should return a `ScoreResult` instance with a normalized
 	`score` in [0.0, 1.0].
 	"""
 

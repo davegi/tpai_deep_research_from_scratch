@@ -120,10 +120,10 @@ Benefits:
 
     - [x] 5.2 Unit tests for agents (implemented in `tests/test_research_agent.py`).
 
-    - [ ] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
-      - [ ] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
-      - [ ] Returns a score (float or structured result)
-      - [ ] Add at least one example scoring implementation and unit tests
+    - [x] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
+      - [x] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
+      - [x] Returns a score (float or structured result)
+      - [x] Add at least one example scoring implementation and unit tests
 
     - [x] 5.4 Define a unified `Location` Pydantic model/interface in `src/research_agent_framework/models.py`
       - [x] Fields for address, lat/lon, name, etc.

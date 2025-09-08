@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from research_agent_framework.models import SerpResult, Location, Rating
+from research_agent_framework.agents.base import ScoreResult
 
 
 class SimpleScorer:
@@ -34,7 +35,7 @@ class SimpleScorer:
         ratio = max(0.0, min(1.0, 1.0 - (meters / 5000.0)))
         return 0.15 * ratio
 
-    def score(self, item: Any, preferences: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    def score(self, item: Any, preferences: Dict[str, Any] | None = None) -> ScoreResult:
         base = 0.0
         reason_parts = []
 
@@ -94,4 +95,4 @@ class SimpleScorer:
                 pass
 
         final = max(0.0, min(1.0, base))
-        return {"score": float(final), "reason": ";".join(reason_parts), "meta": {"raw_base": base}}
+        return ScoreResult(score=float(final), reason=";".join(reason_parts), meta={"raw_base": base})
