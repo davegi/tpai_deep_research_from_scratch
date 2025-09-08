@@ -29,9 +29,22 @@ print(get_settings(force_reload=True).model_name)
         env={**os.environ, "PYTHONPATH": os.path.abspath("src"), "ENV_PATH": env_path},
     )
 
-    print("returncode:", result.returncode)
-    print("stdout:", result.stdout)
-    print("stderr:", result.stderr)
+    try:
+        from research_agent_framework.config import get_logger
+        logger = get_logger()
+        logger.info('returncode: %s', result.returncode)
+        logger.info('stdout: %s', result.stdout)
+        logger.info('stderr: %s', result.stderr)
+    except Exception:
+        try:
+            from rich.console import Console
+            Console().print('returncode:', result.returncode)
+            Console().print('stdout:', result.stdout)
+            Console().print('stderr:', result.stderr)
+        except Exception:
+            print('returncode:', result.returncode)
+            print('stdout:', result.stdout)
+            print('stderr:', result.stderr)
 
 if __name__ == '__main__':
     main()

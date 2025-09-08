@@ -60,9 +60,9 @@ def test_bootstrap_console_and_logger(monkeypatch):
 
     bs._bootstrapped = False
     bs.bootstrap(force=True)
-    assert "console" in created
-    assert "remove" in created
-    assert "add" in created
+    assert_that(created, description="bootstrap should create Console").contains("console")
+    assert_that(created, description="bootstrap should call logger.remove").contains("remove")
+    assert_that(created, description="bootstrap should add a log sink").contains("add")
 
 
 @given(
@@ -85,7 +85,8 @@ def test_bootstrap_property_based(level, fmt):
 
         def add(self, sink, level=None, format=None, *args, **kwargs):
             # level and format should be passed through from settings
-            assert format == fmt
+            from assertpy import assert_that as _assert_that
+            _assert_that(format, description="bootstrap should pass format through").is_equal_to(fmt)
 
     with patch("research_agent_framework.bootstrap.Env", DummyEnv), patch(
         "research_agent_framework.bootstrap.Console", DummyConsole

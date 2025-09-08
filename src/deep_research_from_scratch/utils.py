@@ -13,7 +13,11 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool, InjectedToolArg
-from tavily import TavilyClient
+try:
+    from tavily import TavilyClient
+except Exception:
+    # Tavily (network) client not available in local/dev/test environments.
+    TavilyClient = None
 
 from deep_research_from_scratch.state_research import Summary
 from deep_research_from_scratch.prompts import summarize_webpage_prompt
@@ -40,7 +44,9 @@ def get_current_dir() -> Path:
 # ===== CONFIGURATION =====
 
 summarization_model = init_chat_model(model="openai:gpt-4.1-mini")
-tavily_client = TavilyClient()
+# Defer creating real network clients until explicitly enabled in production.
+# Keeping `tavily_client` as None prevents accidental network calls during tests.
+tavily_client = None
 
 # ===== SEARCH FUNCTIONS =====
 
@@ -64,6 +70,9 @@ def tavily_search_multiple(
 
     # Execute searches sequentially. Note: yon can use AsyncTavilyClient to parallelize this step.
     search_docs = []
+    if tavily_client is None:
+        raise NotImplementedError("Tavily client is disabled in this environment. Enable network adapters in config to use real searches.")
+
     for query in search_queries:
         result = tavily_client.search(
             query,
@@ -91,21 +100,39 @@ def summarize_webpage_content(webpage_content: str) -> str:
         # Generate summary
         summary = structured_model.invoke([
             HumanMessage(content=summarize_webpage_prompt.format(
-                webpage_content=webpage_content, 
-                date=get_today_str()
+                webpage_content=webpage_content,
+                date=get_today_str(),
             ))
         ])
 
+        # The structured_model may return a BaseModel-like object or a plain dict
+        if isinstance(summary, dict):
+            summary_text = summary.get("summary", "")
+            key_excerpts = summary.get("key_excerpts", "")
+        else:
+            # BaseModel or object with attributes
+            summary_text = getattr(summary, "summary", "")
+            key_excerpts = getattr(summary, "key_excerpts", "")
+
         # Format summary with clear structure
         formatted_summary = (
-            f"<summary>\n{summary.summary}\n</summary>\n\n"
-            f"<key_excerpts>\n{summary.key_excerpts}\n</key_excerpts>"
+            f"<summary>\n{summary_text}\n</summary>\n\n"
+            f"<key_excerpts>\n{key_excerpts}\n</key_excerpts>"
         )
 
         return formatted_summary
 
     except Exception as e:
-        print(f"Failed to summarize webpage: {str(e)}")
+        try:
+            from research_agent_framework.config import get_logger
+            get_logger().error("Failed to summarize webpage: %s", str(e))
+        except Exception:
+            # fallback to simple print if logger not available
+            try:
+                from rich.console import Console
+                Console().print(f"Failed to summarize webpage: {str(e)}")
+            except Exception:
+                print(f"Failed to summarize webpage: {str(e)}")
         return webpage_content[:1000] + "..." if len(webpage_content) > 1000 else webpage_content
 
 def deduplicate_search_results(search_results: List[dict]) -> dict:

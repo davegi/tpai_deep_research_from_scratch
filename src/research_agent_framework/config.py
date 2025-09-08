@@ -76,6 +76,8 @@ class Settings(BaseSettings):
 
     # Additional flags
     enable_tracing: bool = False
+    # Supervisor error handling policy: 'record_and_continue' (default), 'fail_fast'
+    supervisor_error_policy: str = "record_and_continue"
 
     model_config = SettingsConfigDict(
         env_prefix="", 

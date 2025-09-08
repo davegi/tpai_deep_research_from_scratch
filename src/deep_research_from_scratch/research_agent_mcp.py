@@ -15,8 +15,10 @@ Key features:
 """
 
 import os
+from typing import Dict, Optional
 
 from typing_extensions import Literal
+from langchain_mcp_adapters.sessions import Connection
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage, filter_messages
@@ -30,7 +32,10 @@ from deep_research_from_scratch.utils import get_today_str, think_tool, get_curr
 # ===== CONFIGURATION =====
 
 # MCP server configuration for filesystem access
-mcp_config = {
+# Explicitly type the config as the adapter's Connection mapping so the
+# MultiServerMCPClient constructor accepts it without an invariant typing
+# complaint from static checkers.
+mcp_config: Dict[str, Connection] = {
     "filesystem": {
         "command": "npx",
         "args": [
@@ -43,7 +48,8 @@ mcp_config = {
 }
 
 # Global client variable - will be initialized lazily
-_client = None
+# Typed as Optional to help static analyzers
+_client: Optional[MultiServerMCPClient] = None
 
 def get_mcp_client():
     """Get or initialize MCP client lazily to avoid issues with LangGraph Platform."""
@@ -78,14 +84,10 @@ async def llm_call(state: ResearcherState):
     # Initialize model with tool binding
     model_with_tools = model.bind_tools(tools)
 
-    # Process user input with system prompt
-    return {
-        "researcher_messages": [
-            model_with_tools.invoke(
-                [SystemMessage(content=research_agent_prompt_with_mcp.format(date=get_today_str()))] + state["researcher_messages"]
-            )
-        ]
-    }
+    # Process user input with system prompt. Ensure we pass a concrete list
+    # to the model invocation (state stores a Sequence[BaseMessage]).
+    messages = [SystemMessage(content=research_agent_prompt_with_mcp.format(date=get_today_str()))] + list(state.get("researcher_messages", []))
+    return {"researcher_messages": [model_with_tools.invoke(messages)]}
 
 async def tool_node(state: ResearcherState):
     """Execute tool calls using MCP tools.
@@ -98,7 +100,10 @@ async def tool_node(state: ResearcherState):
     Note: MCP requires async operations due to inter-process communication
     with the MCP server subprocess. This is unavoidable.
     """
-    tool_calls = state["researcher_messages"][-1].tool_calls
+    # The messages sequence may contain BaseMessage typed items; access tool_calls
+    # defensively using getattr to avoid static attribute errors for other message types.
+    last_msg = list(state.get("researcher_messages", []))[-1]
+    tool_calls = getattr(last_msg, "tool_calls", [])
 
     async def execute_tools():
         """Execute all tool calls. MCP tools require async execution."""
@@ -147,7 +152,7 @@ def compress_research(state: ResearcherState) -> dict:
     """
 
     system_message = compress_research_system_prompt.format(date=get_today_str())
-    messages = [SystemMessage(content=system_message)] + state.get("researcher_messages", []) + [HumanMessage(content=compress_research_human_message)]
+    messages = [SystemMessage(content=system_message)] + list(state.get("researcher_messages", [])) + [HumanMessage(content=compress_research_human_message)]
 
     response = compress_model.invoke(messages)
 
@@ -172,11 +177,11 @@ def should_continue(state: ResearcherState) -> Literal["tool_node", "compress_re
     Determines whether to continue with tool execution or compress research
     based on whether the LLM made tool calls.
     """
-    messages = state["researcher_messages"]
+    messages = list(state.get("researcher_messages", []))
     last_message = messages[-1]
 
-    # Continue to tool execution if tools were called
-    if last_message.tool_calls:
+    # Continue to tool execution if tools were called; guard attribute access.
+    if getattr(last_message, "tool_calls", None):
         return "tool_node"
     # Otherwise, compress research findings
     return "compress_research"

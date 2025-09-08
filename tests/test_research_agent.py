@@ -1,6 +1,7 @@
 import pytest
 import asyncio
 from hypothesis import given, strategies as st
+from assertpy import assert_that
 
 from research_agent_framework.agents.base import ResearchAgent
 from research_agent_framework.models import Scope, ResearchTask
@@ -12,16 +13,16 @@ def test_plan_single_task_no_constraints():
     scope = Scope(topic='Coffee Shops', description='Find the best in SF')
     agent = ResearchAgent(llm_client=None)
     tasks = agent.plan(scope)
-    assert isinstance(tasks, list)
-    assert len(tasks) == 1
-    assert isinstance(tasks[0], ResearchTask)
+    assert_that(tasks, description="plan() should return a list of ResearchTask").is_instance_of(list)
+    assert_that(len(tasks), description="plan() should produce exactly 1 task when no constraints").is_equal_to(1)
+    assert_that(tasks[0], description="first planned item should be a ResearchTask").is_instance_of(ResearchTask)
 
 
 def test_plan_with_constraints():
     scope = Scope(topic='Coffee', constraints=['no paid', 'open now'])
     agent = ResearchAgent(llm_client=None)
     tasks = agent.plan(scope)
-    assert len(tasks) == 2
+    assert_that(len(tasks), description="plan() should produce one task per constraint").is_equal_to(2)
 
 
 @pytest.mark.asyncio
@@ -31,10 +32,10 @@ async def test_run_uses_mockllm():
     agent = ResearchAgent(llm_client=mock)
     task = ResearchTask(id='t1', query='best coffee in soma')
     res = await agent.run(task)
-    assert res.task_id == task.id
-    assert res.success is True
-    assert res.feedback is not None
-    assert 'mock response for' in res.feedback
+    assert_that(res.task_id, description="EvalResult.task_id should match the task id").is_equal_to(task.id)
+    assert_that(res.success, description="EvalResult.success should be True for MockLLM").is_true()
+    assert_that(res.feedback, description="EvalResult.feedback should be populated").is_not_none()
+    assert_that(res.feedback, description="MockLLM feedback should contain marker").contains('mock response for')
 
 
 @given(prompt=st.text(min_size=1, max_size=100))
@@ -43,9 +44,9 @@ def test_property_based_plan_and_run(prompt):
     scope = Scope(topic=prompt)
     agent = ResearchAgent(llm_client=MockLLM(LLMConfig(api_key='x', model='m')))
     tasks = agent.plan(scope)
-    assert tasks
+    assert_that(tasks, description="plan() should produce at least one task").is_not_empty()
     # pick first task and run via asyncio loop
     task = tasks[0]
     res = asyncio.get_event_loop().run_until_complete(agent.run(task))
-    assert res.task_id == task.id
-    assert isinstance(res.score, float)
+    assert_that(res.task_id, description="model-out run: task_id should be preserved").is_equal_to(task.id)
+    assert_that(res.score, description="EvalResult.score should be a float").is_instance_of(float)

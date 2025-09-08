@@ -7,3 +7,4 @@ deep_research_from_scratch.egg-info/
 .mypy_cache
 .hypothesis/
 /.coverage
+/.VSCodeCounter

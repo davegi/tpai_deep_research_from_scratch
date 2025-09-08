@@ -13,6 +13,7 @@ maintaining isolated context windows for each research topic.
 import asyncio
 
 from typing_extensions import Literal
+from typing import Sequence, cast
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import (
@@ -28,13 +29,15 @@ from langgraph.types import Command
 from deep_research_from_scratch.prompts import lead_researcher_prompt
 from deep_research_from_scratch.research_agent import researcher_agent
 from deep_research_from_scratch.state_multi_agent_supervisor import (
-    SupervisorState, 
-    ConductResearch, 
-    ResearchComplete
+    SupervisorState,
+    ConductResearch,
+    ResearchComplete,
 )
 from deep_research_from_scratch.utils import get_today_str, think_tool
+from deep_research_from_scratch.state_research import ResearcherState
+from research_agent_framework.config import get_logger, get_settings
 
-def get_notes_from_tool_calls(messages: list[BaseMessage]) -> list[str]:
+def get_notes_from_tool_calls(messages: Sequence[BaseMessage]) -> list[str]:
     """Extract research notes from ToolMessage objects in supervisor message history.
 
     This function retrieves the compressed research findings that sub-agents
@@ -56,10 +59,10 @@ try:
     import nest_asyncio
     # Only apply if running in Jupyter/IPython environment
     try:
-        from IPython import get_ipython
+        from IPython.core.getipython import get_ipython
         if get_ipython() is not None:
             nest_asyncio.apply()
-    except ImportError:
+    except Exception:
         pass  # Not in Jupyter, no need for nest_asyncio
 except ImportError:
     pass  # nest_asyncio not available, proceed without it
@@ -67,9 +70,9 @@ except ImportError:
 
 # ===== CONFIGURATION =====
 
-supervisor_tools = [ConductResearch, ResearchComplete, think_tool]
+supervisor_tool_list: Sequence[object] = [ConductResearch, ResearchComplete, think_tool]
 supervisor_model = init_chat_model(model="anthropic:claude-sonnet-4-20250514")
-supervisor_model_with_tools = supervisor_model.bind_tools(supervisor_tools)
+supervisor_model_with_tools = supervisor_model.bind_tools(list(supervisor_tool_list))
 
 # System constants
 # Maximum number of tool call iterations for individual researcher agents
@@ -104,7 +107,7 @@ async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tool
         max_concurrent_research_units=max_concurrent_researchers,
         max_researcher_iterations=max_researcher_iterations
     )
-    messages = [SystemMessage(content=system_message)] + supervisor_messages
+    messages = [SystemMessage(content=system_message)] + list(supervisor_messages)
 
     # Make decision about next research steps
     response = await supervisor_model_with_tools.ainvoke(messages)
@@ -134,7 +137,7 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
     """
     supervisor_messages = state.get("supervisor_messages", [])
     research_iterations = state.get("research_iterations", 0)
-    most_recent_message = supervisor_messages[-1]
+    most_recent_message = supervisor_messages[-1] if supervisor_messages else SystemMessage(content="")
 
     # Initialize variables for single return pattern
     tool_messages = []
@@ -144,10 +147,11 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
 
     # Check exit criteria first
     exceeded_iterations = research_iterations >= max_researcher_iterations
-    no_tool_calls = not most_recent_message.tool_calls
+    tool_calls = getattr(most_recent_message, "tool_calls", []) or []
+    no_tool_calls = not bool(tool_calls)
     research_complete = any(
-        tool_call["name"] == "ResearchComplete" 
-        for tool_call in most_recent_message.tool_calls
+        (tc.get("name") if isinstance(tc, dict) else None) == "ResearchComplete"
+        for tc in tool_calls
     )
 
     if exceeded_iterations or no_tool_calls or research_complete:
@@ -158,15 +162,8 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
         # Execute ALL tool calls before deciding next step
         try:
             # Separate think_tool calls from ConductResearch calls
-            think_tool_calls = [
-                tool_call for tool_call in most_recent_message.tool_calls 
-                if tool_call["name"] == "think_tool"
-            ]
-
-            conduct_research_calls = [
-                tool_call for tool_call in most_recent_message.tool_calls 
-                if tool_call["name"] == "ConductResearch"
-            ]
+            think_tool_calls = [tc for tc in tool_calls if (tc.get("name") if isinstance(tc, dict) else None) == "think_tool"]
+            conduct_research_calls = [tc for tc in tool_calls if (tc.get("name") if isinstance(tc, dict) else None) == "ConductResearch"]
 
             # Handle think_tool calls (synchronous)
             for tool_call in think_tool_calls:
@@ -181,19 +178,21 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
 
             # Handle ConductResearch calls (asynchronous)
             if conduct_research_calls:
-                # Launch parallel research agents
-                coros = [
-                    researcher_agent.ainvoke({
-                        "researcher_messages": [
-                            HumanMessage(content=tool_call["args"]["research_topic"])
-                        ],
-                        "research_topic": tool_call["args"]["research_topic"]
-                    }) 
-                    for tool_call in conduct_research_calls
-                ]
+                # Launch parallel research agents using properly-typed payloads
+                research_coroutines = []
+                for tool_call in conduct_research_calls:
+                    research_topic = tool_call["args"]["research_topic"] if isinstance(tool_call, dict) else ""
+                    payload: ResearcherState = {
+                        "researcher_messages": [HumanMessage(content=research_topic)],
+                        "tool_call_iterations": 0,
+                        "research_topic": research_topic,
+                        "compressed_research": "",
+                        "raw_notes": [],
+                    }
+                    research_coroutines.append(researcher_agent.ainvoke(cast(ResearcherState, payload)))
 
                 # Wait for all research to complete
-                tool_results = await asyncio.gather(*coros)
+                tool_results = await asyncio.gather(*research_coroutines)
 
                 # Format research results as tool messages
                 # Each sub-agent returns compressed research findings in result["compressed_research"]
@@ -202,40 +201,62 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
                 research_tool_messages = [
                     ToolMessage(
                         content=result.get("compressed_research", "Error synthesizing research report"),
-                        name=tool_call["name"],
-                        tool_call_id=tool_call["id"]
-                    ) for result, tool_call in zip(tool_results, conduct_research_calls)
+                        name=(tool_call.get("name") if isinstance(tool_call, dict) else ""),
+                        tool_call_id=(tool_call.get("id") if isinstance(tool_call, dict) else None),
+                    )
+                    for result, tool_call in zip(tool_results, conduct_research_calls)
                 ]
 
                 tool_messages.extend(research_tool_messages)
 
                 # Aggregate raw notes from all research
-                all_raw_notes = [
-                    "\n".join(result.get("raw_notes", [])) 
-                    for result in tool_results
-                ]
+                all_raw_notes = ["\n".join(result.get("raw_notes", [])) for result in tool_results]
 
         except Exception as e:
-            print(f"Error in supervisor tools: {e}")
-            should_end = True
-            next_step = END
+            # Use structured logging and consult supervisor error policy
+            try:
+                logger = get_logger()
+            except Exception:
+                # Fallback to print if logger cannot be obtained
+                logger = None
+
+            policy = "record_and_continue"
+            try:
+                policy = get_settings().supervisor_error_policy
+            except Exception:
+                pass
+
+            if logger:
+                logger.error(f"Error in supervisor tools: {e}")
+            else:
+                # Best-effort fallback
+                print(f"Error in supervisor tools: {e}")
+
+            # Determine action based on configured policy
+            if policy == "fail_fast":
+                should_end = True
+                next_step = END
+            else:
+                # record_and_continue: try to continue but mark an error
+                should_end = False
+                next_step = "supervisor"
 
     # Single return point with appropriate state updates
     if should_end:
         return Command(
-            goto=next_step,
+            goto=cast(Literal["supervisor", "__end__"], next_step),
             update={
                 "notes": get_notes_from_tool_calls(supervisor_messages),
-                "research_brief": state.get("research_brief", "")
-            }
+                "research_brief": state.get("research_brief", ""),
+            },
         )
     else:
         return Command(
-            goto=next_step,
+            goto=cast(Literal["supervisor", "__end__"], next_step),
             update={
                 "supervisor_messages": tool_messages,
-                "raw_notes": all_raw_notes
-            }
+                "raw_notes": all_raw_notes,
+            },
         )
 
 # ===== GRAPH CONSTRUCTION =====

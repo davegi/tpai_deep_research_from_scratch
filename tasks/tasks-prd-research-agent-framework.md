@@ -125,10 +125,18 @@ Benefits:
       - [ ] Returns a score (float or structured result)
       - [ ] Add at least one example scoring implementation and unit tests
 
-    - [ ] 5.4 Define a unified `Location` Pydantic model/interface in `src/research_agent_framework/models.py`
-      - [ ] Fields for address, lat/lon, name, etc.
-      - [ ] Ensure adapters (LLM, SerpAPI, Tavily) can return/consume this model
-      - [ ] Add unit tests for model validation and edge cases
+    - [x] 5.4 Define a unified `Location` Pydantic model/interface in `src/research_agent_framework/models.py`
+      - [x] Fields for address, lat/lon, name, etc.
+      - [x] Ensure adapters (LLM, SerpAPI, Tavily) can return/consume this model (duck-typed acceptance implemented)
+      - [x] Add unit tests for model validation and edge cases
+
+    Relevant files modified/added for 5.4:
+    - `src/research_agent_framework/models.py` - Added unified `Location` model, validators, `distance` unit handling, and raw payload
+      preservation.
+    - `tests/test_models_location.py` - Unit tests and Hypothesis property-based tests for `Location` behavior.
+    - `notebooks/0_consolidated_research_agent.ipynb` - Notebook cells demonstrating `Location` usage, sampling-based checks, and demo
+      checks (non-test assertions).
+    - `pyproject.toml` - Added `pydantic-extra-types`, `pint`, and `hypothesis` in dev extras for developer/testing convenience.
 
     - [ ] 5.5 Supervisor robustness, logging, and configurable error policy
       - [ ] 5.5.1 Replace `print(...)` debug in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging using the
@@ -138,9 +146,6 @@ Benefits:
           unit tests for each policy branch.
       - [ ] 5.5.3 Add tests that simulate researcher exceptions and assert the supervisor returns a controlled `Command` update with
         recorded error info and that non-failing researchers still contribute their notes.
-
-  - [x] 4.1.1 Extend `LLMClient` Protocol to support `generate_model(input_model, output_model)` model-in/model-out contract; implemented
-    `generate_model` for `MockLLM` and provided default implementations for other clients. (implemented)
 
   - [ ] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
     - [ ] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
@@ -179,80 +184,84 @@ Benefits:
     - [ ] `tests/test_adapters.py` verifying all adapters return valid `SerpResult` and `from_raw` preserves raw payload.
     - [ ] Add edge-case and error handling tests for each adapter.
     - [x] Add `tests/test_mock_search.py` verifying `MockSearchAdapter` returns `SerpResult` objects and preserves `raw` payload.
-      (implemented)
 
-  - [ ] 6.3 Notebook updates
-    - [ ] Add demo cell that uses each adapter and shows how results are used by the agent. Ensure notebook demo cells import the
-      deterministic `MockSearchAdapter` from `src/research_agent_framework/adapters/search/mock_search.py` when present.
+      ```markdown
+      # Tasks — Research Agent Framework (consolidation)
 
-- [ ] 7. Notebook and demo (living artifact)
+      This file has been updated to reflect the repository's current state (as of this change). The implementation evidence was collected from
+      `src/research_agent_framework/` and `tests/` in the workspace. The checklist below marks implemented components and the remaining work.
 
-  - [ ] 7.1 Create `notebooks/0_consolidated_research_agent.ipynb` (skeleton)
-    - [ ] Top cells: `sys.path` fix, `bootstrap()` call, import `ResearchAgent`, `MockLLM`, `MockSearchAdapter`, `TavilySearchAdapter`,
-      `SerpAPISearchAdapter`.
-    - [ ] Sequential cells: demonstrate models → renderer → agent plan → agent run (with MockLLM) → show EvalResults → scoring → adapter
-      usage (SerpAPI/Tavily) → location handling.
+      ## Implemented components (verified)
 
-  - [ ] 7.2 Per-task iterative updates
-    - [ ] After each parent task is completed, add/adjust notebook cells that demonstrate the newly implemented capability (e.g., after
-      models: show model instance; after renderer: render example template; after scoring: show scoring usage).
-    - [ ] Mark notebook cells with comments like `# TASK-3: renderer example` so reviewers and CI can map features to cells.
+      - `src/research_agent_framework/config.py` — Pydantic v2 `Settings`, `get_settings()`, `get_console()` and `get_logger()` helpers.
+      - `src/research_agent_framework/bootstrap.py` — idempotent `bootstrap()` that reads a `.env` (if present), installs `rich.traceback` and
+        configures `loguru` to write to a `rich.Console` instance.
+      - `src/research_agent_framework/prompts/renderer.py` and `prompts/templates/` — Jinja2 renderer using `StrictUndefined` and example templates
+        (templates present under `prompts/templates/`).
+      - `src/research_agent_framework/models.py` — Pydantic v2 models: `Scope`, `ResearchTask`, `EvalResult`, `SerpResult`, `Location`, and
+        related helpers/validators (distance handling, coords normalization).
+      - `src/research_agent_framework/llm/client.py` — `LLMClient` protocol and `MockLLM` implementation (supports `generate` and `generate_model`).
+      - `src/research_agent_framework/adapters/search/` — `schema.py`, `base.py`, and `mock_search.py` present; `MockSearchAdapter` returns
+        deterministic `SerpResult` objects and a `SerpReply` contract.
+      - `src/research_agent_framework/agents/base.py` — `Agent` Protocol and a minimal `ResearchAgent` implementation (`plan()` and `run()`).
+      - `src/research_agent_framework/mcp/stub.py` — in-process async `MCPStub` message bus for tests.
+      - `src/research_agent_framework/logging.py` — LoggingProtocol and concrete loggers (`LoguruLogger`, `StdLogger`) used by `config.py`.
+      - Notebooks/tests demonstrating integration: `notebooks/0_consolidated_research_agent.ipynb` and a set of tests under `tests/` (e.g.
+        `test_bootstrap.py`, `test_models.py`, `test_renderer.py`, `test_llm_mock.py`, `test_mock_search.py`, `test_research_agent.py`,
+        `test_end_to_end_flow.py`, `test_integration_mock_stack.py`).
 
-  - [ ] 7.3 Per-task test targets
-    - [ ] Create `scripts/run_tests_for_task.py` which accepts a task id or module pattern and runs the subset of tests relevant to that
-      task (helps enforce "ALL tests pass before moving on").
+      ## Checklist (current status)
 
-- [ ] 8. MCP stub
-  - [ ] 8.1 Implement `research_agent_framework/mcp/stub.py`
-    - Provide an in-process async message bus with `register_handler(topic, handler)` where `handler` is an async callable, and `async def
-      publish(topic, message)`.
-    - Keep the API small and fully testable without external network calls.
+      - [x] 1. Configuration & bootstrap
+        - [x] 1.1 `src/research_agent_framework/config.py` (Settings) — implemented
+        - [x] 1.2 `src/research_agent_framework/bootstrap.py` — implemented and idempotent
+        - [x] 1.3 `tests/test_bootstrap.py` — present
 
-  - [x] 8.2 Integration test
-    - `tests/test_integration_mock_stack.py`:
-      - Wire `ResearchAgent` + `MockLLM` + `MCPStub` and assert a multi-step exchange produces expected `EvalResult` objects. (implemented)
-    - [x] 8.3 End-to-end integration test
-      - Note: MCP stub is anticipatory and lower priority; if MCP is not implemented, E2E can run by directly invoking agent graphs and
-        mocking tool calls.
-      - [x] 8.3.1 Add `tests/test_end_to_end_flow.py` that executes the compiled `StateGraph` from
-        `src/deep_research_from_scratch/research_agent_full.py` using mocked providers (`MockLLM`, `MockSearchAdapter`, and MCP stub).
-        (implemented)
-      - [x] 8.3.2 The E2E test should assert the workflow completes and that the final node produces `final_report`, `notes` (list[str]) and
-        `research_brief`. (implemented)
-      - [x] 8.3.3 Mark the E2E test `pytest.mark.asyncio` and make it deterministic and fast (no sleeps/timeouts in normal path).
-        (implemented)
+      - [x] 2. Models & validation
+        - [x] 2.1 `src/research_agent_framework/models.py` — implemented (Scope, ResearchTask, EvalResult, SerpResult, Location)
+        - [x] 2.2 `tests/test_models.py` — present
 
-- [ ] 9. Finalize tests and docs
-  - [ ] 9.1 Run full test suite locally and fix any failures (unit + integration where fast). Provide a short test report in `tasks/`.
-  - [ ] 9.2 Update `README.md` with exact run instructions for the notebook and tests and commit changes; include tips for adding the repo
-    root to PYTHONPATH in notebooks.
+      - [x] 3. Prompt renderer
+        - [x] 3.1 `src/research_agent_framework/prompts/renderer.py` — implemented
+        - [x] 3.2 templates under `src/research_agent_framework/prompts/templates/` — present
+        - [x] 3.3 `tests/test_renderer.py` — present
 
-###
+      - [x] 4. LLM client & MockLLM
+        - [x] 4.1 `src/research_agent_framework/llm/client.py` — `LLMClient` protocol and `MockLLM` implemented
+        - [x] 4.2 tests for `MockLLM` — present (`tests/test_llm_mock.py`)
 
-### Relevant Files (detailed mapping)
+      - [x] 5. Agents
+        - [x] 5.1 `src/research_agent_framework/agents/base.py` — `Agent` Protocol and `ResearchAgent` implemented
+        - [x] 5.2 `tests/test_research_agent.py` — present
+        - [ ] 5.3 `ScoringProtocol` and example scoring implementations — NOT implemented
 
-- `research_agent_framework/config.py` — Settings + logging config
-- `research_agent_framework/bootstrap.py` — bootstrap() helper
-- `research_agent_framework/models.py` — Scope, ResearchTask, EvalResult, SerpResult
-- `research_agent_framework/prompts/renderer.py` — render_template helper
-- `research_agent_framework/prompts/templates/*.j2` — derived templates from `src/deep_research_from_scratch/prompts.py`
-- `research_agent_framework/llm/client.py` — LLMClient protocol and MockLLM
-- `research_agent_framework/agents/base.py` — Agent protocol and ResearchAgent implementation
-- `research_agent_framework/adapters/search/*` — Search adapter interface + MockSearchAdapter
-- `research_agent_framework/mcp/stub.py` — lightweight in-process MCP stub
-- `notebooks/0_consolidated_research_agent.ipynb` — demo notebook (skeleton + per-task cells)
-- `tests/test_config.py`, `tests/test_bootstrap.py`, `tests/test_models.py`, `tests/test_renderer.py`, `tests/test_llm_mock.py`,
-`tests/test_config.py` - Test ensuring config settings, error handling, and logger backend coverage. Now includes property-based and
-edge-case tests for all branches and error handling. `tests/test_bootstrap.py` - Test ensuring `bootstrap()` reads env and configures
-logging without raising. Now includes property-based and edge-case tests for all branches and error handling. `tests/test_logging.py` - Test
-ensuring logger classes, property setters/getters, and error handling. Now includes property-based and edge-case tests for all branches and
-  error handling. `tests/test_models.py`, `tests/test_renderer.py`, `tests/test_llm_mock.py`, `tests/test_research_agent.py`,
-  `tests/test_adapters.py`, `tests/test_integration_mock_stack.py`
+      - [x] 6. Adapters (mock)
+        - [x] 6.1 `src/research_agent_framework/adapters/search/mock_search.py` — `MockSearchAdapter` implemented
+        - [x] 6.2 `src/research_agent_framework/adapters/search/schema.py` — `SerpRequest` / `SerpReply` models present
+        - [ ] 6.3 Real-world adapters (`SerpAPI`, `Tavily`) and `from_raw` factories — NOT implemented
 
-### Notes on testing strategy and gating
+      - [x] 7. MCP & integration test harness
+        - [x] 7.1 `src/research_agent_framework/mcp/stub.py` — implemented
+        - [x] 7.2 Integration tests demonstrating wired `MockLLM` + `MCPStub` + agent flow — present
 
-- Primary tests ui is VS Code's Test Explorer. In addition...
-  - Enforce the rule: "ALL existing and newly added tests  must pass before merging or proceeding to the next parent task." Use
-    `scripts/run_tests_for_task.py` to run focused test subsets during development.
-  - Prefer small, fast unit tests. Keep integration tests optional for CI but runnable locally.
-  - Use `pytest -k <pattern>` and `pytest-asyncio` for async tests; include examples in `README.md`.
+      - [ ] 8. Supervisor robustness & error-policy
+        - [ ] 8.1 Replace `print()` debug output in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging
+          via the framework `get_settings()`/`console`/`logger` (partial edits exist elsewhere but the supervisor file still requires review)
+        - [ ] 8.2 Add Settings-driven supervisor error policy modes (`record_and_continue`, `fail_fast`, `configurable`) with tests — NOT implemented
+
+      - [ ] 9. Documentation & final test gating
+        - [ ] 9.1 Run full test suite and fix any failing tests (recommended as a CI gate)
+        - [ ] 9.2 Update `README.md` with exact run instructions for notebooks/tests and PYTHONPATH guidance
+
+      ## Next recommended steps (short)
+
+      1. Add a `ScoringProtocol` and at least one example scoring implementation with unit tests (helps close the agent feature gap).
+      2. Implement `from_raw` factories or adapter helpers to preserve provider raw payloads consistently across adapters.
+      3. Replace remaining raw `print()` uses (notebooks and `src/deep_research_from_scratch/*`) with `get_console()` / `get_logger()` usage and add supervisor error-policy toggles in `Settings` with tests.
+      4. Run the full test suite locally (`pytest -q`) and address any remaining failures as CI gating.
+
+      ## How this mapping was created
+
+      I verified the presence and content of the files under `src/research_agent_framework/` and a representative set of tests under `tests/` before marking items implemented. The checklist focuses on concrete file-level evidence; implementation completeness (API surface, docstrings, edge-case coverage) may still require follow-up as noted above.
+
+      ```
