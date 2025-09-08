@@ -15,8 +15,8 @@ try:
 except Exception:
     # Fallback to Console for human-readable output
     try:
-        from rich.console import Console
-        Console().print('imports ok:', MockLLM is not None, MockSearchAdapter is not None)
+        from research_agent_framework.config import get_console
+        get_console().print('imports ok:', MockLLM is not None, MockSearchAdapter is not None)
     except Exception:
         # Last resort
         print('imports ok:', MockLLM is not None, MockSearchAdapter is not None)

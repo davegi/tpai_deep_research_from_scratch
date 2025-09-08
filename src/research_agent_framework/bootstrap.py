@@ -14,7 +14,7 @@ from loguru import logger as _logger
 from rich import traceback as _rich_traceback
 from rich.console import Console
 
-from .config import get_settings
+from .config import get_settings, get_console, get_logger
 
 # Keep a simple module-level lock and flag for idempotence
 _bootstrap_lock = threading.Lock()
@@ -50,16 +50,59 @@ def bootstrap(force: bool = False) -> None:
         # Install rich traceback
         _rich_traceback.install()
 
-        # Create a shared rich Console for the application (exported as `console`)
-        c = Console()
-        console = c
-        assert_that(console).is_not_none()
-
-        # Configure loguru logger to write to the rich Console (preserving formatting)
+        # Create or reuse the shared Console for the application (tests patch this via bootstrap.Console)
         settings = get_settings()
-        _logger.remove()
+        # If force=True we should recreate the Console using the module-level
+        # `Console` constructor so tests that monkeypatch that constructor are
+        # exercised. Otherwise prefer an existing module-level console, then
+        # settings.console, and finally construct a new Console.
+        if force:
+            # Re-run bootstrap actions. Recreate the Console only when:
+            # - there is no existing module-level console, or
+            # - the existing console is NOT an instance of the currently-imported
+            #   `Console` class (this ensures tests that monkeypatch
+            #   `bootstrap.Console` get exercised),
+            # otherwise reuse the existing console to preserve idempotence.
+            try:
+                if console is not None and isinstance(console, Console):
+                    c = console
+                else:
+                    c = Console()
+            except Exception:
+                # fall back to any existing console or settings.console if constructor fails
+                c = console
+                try:
+                    existing = getattr(settings, "console", None)
+                    if c is None and existing is not None:
+                        c = existing
+                except Exception:
+                    pass
+        else:
+            if console is not None:
+                c = console
+            else:
+                try:
+                    existing = getattr(settings, "console", None)
+                except Exception:
+                    existing = None
+                if existing is not None:
+                    c = existing
+                else:
+                    c = Console()
+        console = c
+        # Also make sure Settings holds a reference so get_console() and consumers reuse it
+        try:
+            settings.console = c
+        except Exception:
+            pass
 
-        # Use the local Console instance as the sink target. Convert the incoming message to str
+        assert_that(console).is_not_none()
+        # Help type-checkers: `c` must be a Console here.
+        assert c is not None
+
+        # Configure loguru logger to write to the shared Console (preserving formatting)
+        _logger.remove()
+        # Use the shared Console as the sink target. Convert the incoming message to str
         # because loguru may pass rich objects.
         _logger.add(lambda m: c.print(str(m), end=""), level=settings.logging.level, format=settings.logging.fmt)
 

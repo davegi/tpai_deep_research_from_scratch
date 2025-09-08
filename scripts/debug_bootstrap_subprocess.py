@@ -37,10 +37,11 @@ print(get_settings(force_reload=True).model_name)
         logger.info('stderr: %s', result.stderr)
     except Exception:
         try:
-            from rich.console import Console
-            Console().print('returncode:', result.returncode)
-            Console().print('stdout:', result.stdout)
-            Console().print('stderr:', result.stderr)
+            from research_agent_framework.config import get_console
+            c = get_console()
+            c.print('returncode:', result.returncode)
+            c.print('stdout:', result.stdout)
+            c.print('stderr:', result.stderr)
         except Exception:
             print('returncode:', result.returncode)
             print('stdout:', result.stdout)

@@ -191,26 +191,55 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
                     }
                     research_coroutines.append(researcher_agent.ainvoke(cast(ResearcherState, payload)))
 
-                # Wait for all research to complete
-                tool_results = await asyncio.gather(*research_coroutines)
+                # Wait for all research to complete, allowing individual failures to be captured
+                tool_results = await asyncio.gather(*research_coroutines, return_exceptions=True)
 
-                # Format research results as tool messages
-                # Each sub-agent returns compressed research findings in result["compressed_research"]
-                # We write this compressed research as the content of a ToolMessage, which allows
-                # the supervisor to later retrieve these findings via get_notes_from_tool_calls()
-                research_tool_messages = [
-                    ToolMessage(
-                        content=result.get("compressed_research", "Error synthesizing research report"),
-                        name=(tool_call.get("name") if isinstance(tool_call, dict) else ""),
-                        tool_call_id=(tool_call.get("id") if isinstance(tool_call, dict) else None),
+                research_tool_messages = []
+                aggregated_raw_notes = []
+                # Iterate results and corresponding tool_calls
+                for result, tool_call in zip(tool_results, conduct_research_calls):
+                    if isinstance(result, Exception):
+                        # Consult policy per failure
+                        policy = "record_and_continue"
+                        try:
+                            policy = get_settings().supervisor_error_policy
+                        except Exception:
+                            pass
+                        try:
+                            logger = get_logger()
+                            logger.error("researcher failed: %s", result)
+                        except Exception:
+                            pass
+
+                        if policy == "fail_fast":
+                            should_end = True
+                            next_step = END
+                            break
+                        else:
+                            # record_and_continue: skip this result
+                            continue
+
+                    # Successful result expected as mapping (dict-like)
+                    if isinstance(result, dict):
+                        content_str = result.get("compressed_research", "Error synthesizing research report")
+                        raw_notes_list = result.get("raw_notes", [])
+                    else:
+                        # Unexpected result shape: stringify
+                        content_str = str(result)
+                        raw_notes_list = []
+
+                    research_tool_messages.append(
+                        ToolMessage(
+                            content=content_str,
+                            name=(tool_call.get("name") if isinstance(tool_call, dict) else ""),
+                            tool_call_id=(tool_call.get("id") if isinstance(tool_call, dict) else None),
+                        )
                     )
-                    for result, tool_call in zip(tool_results, conduct_research_calls)
-                ]
+
+                    aggregated_raw_notes.append("\n".join(raw_notes_list))
 
                 tool_messages.extend(research_tool_messages)
-
-                # Aggregate raw notes from all research
-                all_raw_notes = ["\n".join(result.get("raw_notes", [])) for result in tool_results]
+                all_raw_notes = aggregated_raw_notes
 
         except Exception as e:
             # Use structured logging and consult supervisor error policy

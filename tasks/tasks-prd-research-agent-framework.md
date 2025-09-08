@@ -112,15 +112,15 @@ Benefits:
   - [x] 4A.4 Update notebook and test documentation
     - [x] 4A.4.1 Record notebook/test updates required after adding PBTs. [COMPLETE]
     - [x] 4A.4.2 Ensure all new tests pass before proceeding to agent implementation. [COMPLETE]
-  - [ ] 5. Agents (implementation)
+  - [x] 5. Agents (implementation)
     - [x] 5.1 Create `src/research_agent_framework/agents/base.py` defining `Agent` Protocol and `ResearchAgent` implementation.
-      - [x] 5.1.1 Implement `ResearchAgent` class with dependency injection for an LLM client and optional search adapter. (implemented)
-      - [x] 5.1.2 Unit tests & PBTs added in `tests/test_research_agent.py`. (implemented)
-      - [x] 5.1.3 Notebook demo cell added to `notebooks/0_consolidated_research_agent.ipynb` showing `plan()` and `run()`. (implemented)
+      - [x] 5.1.1 Implement `ResearchAgent` class with dependency injection for an LLM client and optional search adapter.
+      - [x] 5.1.2 Unit tests & PBTs added in `tests/test_research_agent.py`.
+      - [x] 5.1.3 Notebook demo cell added to `notebooks/0_consolidated_research_agent.ipynb` showing `plan()` and `run()`.
 
     - [x] 5.2 Unit tests for agents (implemented in `tests/test_research_agent.py`).
 
-    - [x] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
+    - [x] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` (or a dedicated scoring module)
       - [x] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
       - [x] Returns a score (float or structured result)
       - [x] Add at least one example scoring implementation and unit tests
@@ -130,20 +130,19 @@ Benefits:
       - [x] Ensure adapters (LLM, SerpAPI, Tavily) can return/consume this model (duck-typed acceptance implemented)
       - [x] Add unit tests for model validation and edge cases
 
-    Relevant files modified/added for 5.4:
-    - `src/research_agent_framework/models.py` - Added unified `Location` model, validators, `distance` unit handling, and raw payload
-      preservation.
-    - `tests/test_models_location.py` - Unit tests and Hypothesis property-based tests for `Location` behavior.
-    - `notebooks/0_consolidated_research_agent.ipynb` - Notebook cells demonstrating `Location` usage, sampling-based checks, and demo
-      checks (non-test assertions).
-    - `pyproject.toml` - Added `pydantic-extra-types`, `pint`, and `hypothesis` in dev extras for developer/testing convenience.
+      Relevant files modified/added for 5.4:
+      - `src/research_agent_framework/models.py` - Added unified `Location` model, validators, `distance` unit handling, and raw payload
+        preservation.
+      - `tests/test_models_location.py` - Unit tests and Hypothesis property-based tests for `Location` behavior.
+      - `notebooks/0_consolidated_research_agent.ipynb` - Notebook cells demonstrating `Location` usage, sampling-based checks, and demo
+        checks (non-test assertions).
+      - `pyproject.toml` - Added `pydantic-extra-types`, `pint`, and `hypothesis` in dev extras for developer/testing convenience.
 
-    - [ ] 5.5 Supervisor robustness, logging, and configurable error policy
-      - [x] 5.5.1 Replace `print(...)` debug in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging using the
-        bootstrap-exported `logger`/`console` (implemented: `multi_agent_supervisor.py` updated to use `get_settings()` logger/console and explicit policy handling).
-      - [ ] 5.5.2 Add a `Settings` or env-driven toggle for supervisor error policy with modes: `record_and_continue` (default),
-        `fail_fast`, and `configurable` (explicit choice at runtime). Add unit tests for each policy branch.
-      - [ ] 5.5.3 Add tests that simulate researcher exceptions and assert the supervisor returns a controlled `Command` update with
+    - [x] 5.5 Supervisor robustness, logging, and configurable error policy
+      - [x] 5.5.1 Replace `print()` debug output in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging via
+        the framework `get_settings()`/`console`/`logger`.
+      - [x] 5.5.2 Add Settings-driven supervisor error policy modes (`record_and_continue`, `fail_fast`, `configurable`) with tests.
+      - [x] 5.5.3 Add tests that simulate researcher exceptions and assert the supervisor returns a controlled `Command` update with
         recorded error info and that non-failing researchers still contribute their notes.
 
 - [ ] 6. Adapters (e.g., search)
@@ -212,8 +211,8 @@ Benefits:
 
       - [x] 5. Agents
         - [x] 5.1 `src/research_agent_framework/agents/base.py` — `Agent` Protocol and `ResearchAgent` implemented
-        - [x] 5.2 `tests/test_research_agent.py` — present
-        - [ ] 5.3 `ScoringProtocol` and example scoring implementations — NOT implemented
+          - [x] 5.2 `tests/test_research_agent.py` — present
+          - [x] 5.3 `ScoringProtocol` and example scoring implementations — implemented
 
       - [x] 6. Adapters (mock)
         - [x] 6.1 `src/research_agent_framework/adapters/search/mock_search.py` — `MockSearchAdapter` implemented
@@ -224,10 +223,9 @@ Benefits:
         - [x] 7.1 `src/research_agent_framework/mcp/stub.py` — implemented
         - [x] 7.2 Integration tests demonstrating wired `MockLLM` + `MCPStub` + agent flow — present
 
-      - [ ] 8. Supervisor robustness & error-policy
-        - [ ] 8.1 Replace `print()` debug output in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging
-          via the framework `get_settings()`/`console`/`logger` (partial edits exist elsewhere but the supervisor file still requires review)
-        - [ ] 8.2 Add Settings-driven supervisor error policy modes (`record_and_continue`, `fail_fast`, `configurable`) with tests — NOT implemented
+      - [x] 8. Supervisor robustness & error-policy
+        - [x] 8.1 Replace `print()` debug output in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging via the framework `get_settings()`/`console`/`logger` (implemented)
+        - [x] 8.2 Add Settings-driven supervisor error policy modes (`record_and_continue`, `fail_fast`, `configurable`) with tests (implemented)
 
       - [ ] 9. Documentation & final test gating
         - [ ] 9.1 Run full test suite and fix any failing tests (recommended as a CI gate)
