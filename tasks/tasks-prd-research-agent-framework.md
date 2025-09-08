@@ -120,10 +120,10 @@ Benefits:
 
     - [x] 5.2 Unit tests for agents (implemented in `tests/test_research_agent.py`).
 
-    - [x] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
-      - [x] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
-      - [x] Returns a score (float or structured result)
-      - [x] Add at least one example scoring implementation and unit tests
+    - [ ] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
+      - [ ] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
+      - [ ] Returns a score (float or structured result)
+      - [ ] Add at least one example scoring implementation and unit tests
 
     - [x] 5.4 Define a unified `Location` Pydantic model/interface in `src/research_agent_framework/models.py`
       - [x] Fields for address, lat/lon, name, etc.
@@ -139,30 +139,10 @@ Benefits:
     - `pyproject.toml` - Added `pydantic-extra-types`, `pint`, and `hypothesis` in dev extras for developer/testing convenience.
 
     - [ ] 5.5 Supervisor robustness, logging, and configurable error policy
-      - [ ] 5.5.1 Replace `print(...)` debug in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging using the
-        bootstrap-exported `logger`/`console`.
-        - [ ] 5.5.2 Add a `Settings` or env-driven toggle for supervisor error policy with modes: `record_and_continue` (default),
-          `fail_fast`, and `configurable` (explicit choice at runtime). Default policy: `record_and_continue` (best-effort aggregation). Add
-          unit tests for each policy branch.
-      - [ ] 5.5.3 Add tests that simulate researcher exceptions and assert the supervisor returns a controlled `Command` update with
-        recorded error info and that non-failing researchers still contribute their notes.
-
-  - [ ] 5.3 Define `ScoringProtocol` (Protocol) in `src/research_agent_framework/agents/base.py` or a dedicated scoring module
-    - [ ] Accepts all relevant data for scoring (e.g., restaurant info, reviews, location, user preferences)
-    - [ ] Returns a score (float or structured result)
-    - [ ] Add at least one example scoring implementation and unit tests
-
-  - [ ] 5.4 Define a unified `Location` Pydantic model/interface in `src/research_agent_framework/models.py`
-    - [ ] .Fields for address, lat/lon, name, etc.
-    - [ ] Ensure adapters (LLM, SerpAPI, Tavily) can return/consume this model
-    - [ ] Add unit tests for model validation and edge cases
-
-    - [ ] 5.5 Supervisor robustness, logging, and configurable error policy
-      - [ ] 5.5.1 Replace `print(...)` debug in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging using the
-        bootstrap-exported `logger`/`console`.
-        - [ ] 5.5.2 Add a `Settings` or env-driven toggle for supervisor error policy with modes: `record_and_continue` (default),
-          `fail_fast`, and `configurable` (explicit choice at runtime). Default policy: `record_and_continue` (best-effort aggregation). Add
-          unit tests for each policy branch.
+      - [x] 5.5.1 Replace `print(...)` debug in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging using the
+        bootstrap-exported `logger`/`console` (implemented: `multi_agent_supervisor.py` updated to use `get_settings()` logger/console and explicit policy handling).
+      - [ ] 5.5.2 Add a `Settings` or env-driven toggle for supervisor error policy with modes: `record_and_continue` (default),
+        `fail_fast`, and `configurable` (explicit choice at runtime). Add unit tests for each policy branch.
       - [ ] 5.5.3 Add tests that simulate researcher exceptions and assert the supervisor returns a controlled `Command` update with
         recorded error info and that non-failing researchers still contribute their notes.
 
