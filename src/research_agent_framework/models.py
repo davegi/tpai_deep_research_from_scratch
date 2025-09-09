@@ -241,3 +241,51 @@ class SerpResult(BaseModel):
 	categories: List[str] = Field(default_factory=list, description="List of category strings")
 	provider_meta: Optional[ProviderMeta] = Field(default=None, description="Provider-specific metadata and raw id/payload")
 
+	@classmethod
+	def from_raw(cls, raw: dict, provider: Optional[str] = None) -> "SerpResult":
+		"""Construct a SerpResult from a provider raw payload.
+
+		This factory attempts to normalize common provider payload keys into the
+		simple `title`, `url`, `snippet` shape while preserving the original
+		payload under `raw` and attaching provider metadata under `provider_meta`.
+
+		It is intentionally permissive: missing optional fields are left as
+		None, but `title` and `url` are required by the model and therefore
+		callers should provide payloads that contain at least those fields or
+		handle `ValidationError` raised by pydantic.
+		"""
+		title = None
+		url = None
+		snippet = None
+
+		if not isinstance(raw, dict):
+			raise TypeError("raw payload must be a dict")
+
+		# Common provider keys -> normalize
+		# title/name
+		if "title" in raw and raw.get("title"):
+			title = raw.get("title")
+		elif "name" in raw and raw.get("name"):
+			title = raw.get("name")
+
+		# url/link
+		if "url" in raw and raw.get("url"):
+			url = raw.get("url")
+		elif "link" in raw and raw.get("link"):
+			url = raw.get("link")
+
+		# snippet/description
+		if "snippet" in raw and raw.get("snippet"):
+			snippet = raw.get("snippet")
+		elif "description" in raw and raw.get("description"):
+			snippet = raw.get("description")
+
+		provider_meta = ProviderMeta(provider=provider or raw.get("provider"), id=raw.get("id"), raw=raw)
+
+		# Construct using pydantic validation (HttpUrl and required fields enforced)
+		# Do not coerce missing url to empty string; require a present URL
+		url_value = url or raw.get("url") or raw.get("link")
+		if not url_value:
+			raise ValueError("cannot build SerpResult.from_raw without a URL in raw payload")
+		return cls(title=title or "", url=url_value, snippet=snippet, raw=raw, provider_meta=provider_meta)
+

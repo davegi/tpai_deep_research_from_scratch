@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Dict
 
 from pydantic import TypeAdapter, HttpUrl
@@ -15,7 +13,15 @@ class TavilySearchAdapter:
     and preserves inbound `raw` payloads into `SerpResult.raw`.
     """
 
-    provider_name = "tavily-stub"
+    def __init__(self, provider_name: str = "tavily-stub") -> None:
+        self.provider_name = provider_name
+
+    @classmethod
+    def from_raw(cls, raw: Dict[str, object]) -> "TavilySearchAdapter":
+        provider = "tavily"
+        if isinstance(raw, dict) and raw.get("provider"):
+            provider = str(raw.get("provider"))
+        return cls(provider_name=provider)
 
     async def search(self, request: SerpRequest) -> SerpReply:
         # Empty limit -> empty reply
@@ -34,10 +40,3 @@ class TavilySearchAdapter:
         )
 
         return SerpReply(results=[r], meta=ReplyMeta(provider=self.provider_name, total_results=1))
-
-    @classmethod
-    def from_raw(cls, raw: Dict[str, object]) -> "TavilySearchAdapter":
-        # In a real adapter this would extract API keys/endpoints. For the
-        # stub we only expose the factory contract and allow tests to pass
-        # arbitrary provider `raw` payloads through the SerpResult.raw field.
-        return cls()

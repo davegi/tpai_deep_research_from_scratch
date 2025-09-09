@@ -152,6 +152,10 @@ Benefits:
   - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
 - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
 - [ ] Add a `from_raw` factory where applicable to preserve raw payloads in `SerpResult.raw`.
+
+  - Updated during this subtask:
+    - `src/research_agent_framework/models.py` - Added `SerpResult.from_raw` factory to normalize provider payloads and preserve `raw` and `provider_meta`.
+    - `tests/test_serpresult_from_raw.py` - New unit tests for `SerpResult.from_raw` (happy path and missing-URL behavior).
 - [x] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use by
    integration tests and notebook demos.
   - [ ] Implement `TavilySearchAdapter` for test repeatability and compatibility with original notebooks.
@@ -161,7 +165,9 @@ Benefits:
 
 - [ ] 6.2 Tests
   - [x] `tests/test_adapters.py` verifying all adapters return valid `SerpResult` and `from_raw` preserves raw payload.
-  - [ ] Add edge-case and error handling tests for each adapter.
+  - [x] Add edge-case and error handling tests for each adapter.
+    - Updated during this subtask:
+      - `tests/test_adapters_edgecases.py` - New tests for empty query, limit=0, and `SerpResult.from_raw` non-dict guard.
   - [x] Add `tests/test_mock_search.py` verifying `MockSearchAdapter` returns `SerpResult` objects and preserves `raw` payload.
 
       ```markdown
