@@ -29,6 +29,7 @@ class BaseSearchAdapter(ABC):
         snippet = cast(Optional[str], raw.get('snippet'))
 
         url_val = raw.get('url', '') or ''
+        # Validate/coerce url to HttpUrl; fall back to a known-safe URL if validation fails.
         try:
             url = TypeAdapter(HttpUrl).validate_python(url_val)
         except Exception:

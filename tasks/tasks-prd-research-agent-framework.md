@@ -145,24 +145,24 @@ Benefits:
       - [x] 5.5.3 Add tests that simulate researcher exceptions and assert the supervisor returns a controlled `Command` update with
         recorded error info and that non-failing researchers still contribute their notes.
 
-- [ ] 6. Adapters (e.g., search)
+ [x] 6. Adapters (e.g., search)
 
-  - [ ] 6.1 Create `research_agent_framework/adapters/search/__init__.py` and modules
-    - [ ] Define `class SearchAdapter(Protocol)` with `async def search(self, q: str, **kwargs) -> list[SerpResult]`.
-    - [ ] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
-  - [ ] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
-  - [ ] Add a `from_raw` factory where applicable to preserve raw payloads in `SerpResult.raw`.
-  - [ ] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use
-    by integration tests and notebook demos.
-    - [ ] Implement `TavilySearchAdapter` for test repeatability and compatibility with original notebooks.
-    - [ ] Implement `SerpAPISearchAdapter` as the primary real-world adapter, supporting restaurant/event/activity search and scoring.
-    - [ ] Ensure adapters support unified `Location` model for input/output.
-    - [ ] Consider LangChain-compatible tools for extensibility (optional, based on future use cases).
+- [x] 6.1 Create `research_agent_framework/adapters/search/__init__.py` and modules
+  - [x] Define `class SearchAdapter(Protocol)` with `async def search(self, q: str, **kwargs) -> list[SerpResult]`.
+  - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
+- [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
+- [ ] Add a `from_raw` factory where applicable to preserve raw payloads in `SerpResult.raw`.
+- [x] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use
+   by integration tests and notebook demos.
+  - [ ] Implement `TavilySearchAdapter` for test repeatability and compatibility with original notebooks.
+  - [ ] Implement `SerpAPISearchAdapter` as the primary real-world adapter, supporting restaurant/event/activity search and scoring.
+  - [x] Ensure adapters support unified `Location` model for input/output.
+  - [ ] Consider LangChain-compatible tools for extensibility (optional, based on future use cases).
 
-  - [ ] 6.2 Tests
-    - [ ] `tests/test_adapters.py` verifying all adapters return valid `SerpResult` and `from_raw` preserves raw payload.
-    - [ ] Add edge-case and error handling tests for each adapter.
-    - [x] Add `tests/test_mock_search.py` verifying `MockSearchAdapter` returns `SerpResult` objects and preserves `raw` payload.
+- [ ] 6.2 Tests
+  - [x] `tests/test_adapters.py` verifying all adapters return valid `SerpResult` and `from_raw` preserves raw payload.
+  - [ ] Add edge-case and error handling tests for each adapter.
+  - [x] Add `tests/test_mock_search.py` verifying `MockSearchAdapter` returns `SerpResult` objects and preserves `raw` payload.
 
       ```markdown
       # Tasks — Research Agent Framework (consolidation)

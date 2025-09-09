@@ -21,6 +21,13 @@ class MockSearchAdapter:
         is_back_compat = isinstance(request, str)
         q = request if is_back_compat else request.query
 
+        # Defensive: if SerpRequest with limit==0 or empty query, return empty results
+        if not is_back_compat and getattr(request, 'limit', 10) == 0:
+            return SerpReply(results=[], meta=ReplyMeta(provider="mock", total_results=0))
+        if not q:
+            # Back-compat callers might pass empty string; return empty list
+            return [] if is_back_compat else SerpReply(results=[], meta=ReplyMeta(provider="mock", total_results=0))
+
         # Validate urls as HttpUrl to satisfy SerpResult type
         url_adapter = TypeAdapter(HttpUrl)
         url1 = url_adapter.validate_python("https://coffee.example.com/a")
@@ -44,13 +51,13 @@ class MockSearchAdapter:
         reply = SerpReply(results=[r1, r2], meta=ReplyMeta(provider="mock", total_results=2))
         return reply
 
-        @classmethod
-        def from_raw(cls, raw: dict) -> 'MockSearchAdapter':
-            """Factory to construct a MockSearchAdapter from a raw provider payload.
+    @classmethod
+    def from_raw(cls, raw: dict) -> 'MockSearchAdapter':
+        """Factory to construct a MockSearchAdapter from a raw provider payload.
 
-            For the mock adapter this simply returns an instance — the important
-            contract is that adapters expose `from_raw` for consistency with real
-            adapters which may need to normalize fields and preserve `raw`.
-            """
-            return cls()
+        For the mock adapter this simply returns an instance — the important
+        contract is that adapters expose `from_raw` for consistency with real
+        adapters which may need to normalize fields and preserve `raw`.
+        """
+        return cls()
 
