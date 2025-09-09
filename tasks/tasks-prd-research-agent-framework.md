@@ -152,8 +152,8 @@ Benefits:
   - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
 - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
 - [ ] Add a `from_raw` factory where applicable to preserve raw payloads in `SerpResult.raw`.
-- [x] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use
-   by integration tests and notebook demos.
+- [x] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use by
+   integration tests and notebook demos.
   - [ ] Implement `TavilySearchAdapter` for test repeatability and compatibility with original notebooks.
   - [ ] Implement `SerpAPISearchAdapter` as the primary real-world adapter, supporting restaurant/event/activity search and scoring.
   - [x] Ensure adapters support unified `Location` model for input/output.
