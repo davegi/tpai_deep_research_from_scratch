@@ -1,5 +1,12 @@
+"""In-process MCP stub used for deterministic tests and notebooks.
+
+This minimal stub exposes a tiny in-process async message bus where
+handlers can be registered for named topics and `publish` dispatches
+to those handlers concurrently. The implementation is intentionally
+small and dependency-free so tests remain deterministic.
+"""
 import asyncio
-from typing import Callable, Dict, List, Any, Coroutine
+from typing import Any, Callable, Dict, List, Coroutine
 
 
 class MCPStub:
@@ -23,3 +30,7 @@ class MCPStub:
             return
         # Fire all handlers concurrently and wait
         await asyncio.gather(*(h(message) for h in handlers))
+
+    def close(self) -> None:
+        self._handlers.clear()
+

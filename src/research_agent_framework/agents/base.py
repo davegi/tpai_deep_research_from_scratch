@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from uuid import uuid4
 
 from research_agent_framework.models import Scope, ResearchTask, EvalResult
+from research_agent_framework.protocols import AgentContext
 
 
 @runtime_checkable
@@ -23,10 +24,20 @@ class ResearchAgent:
 	and lightweight so unit tests and property-based tests can exercise behavior.
 	"""
 
-	def __init__(self, llm_client, search_adapter: Optional[Any] = None):
-		# llm_client: any object with `async def generate(prompt: str) -> str`
-		self.llm = llm_client
-		self.search = search_adapter
+	def __init__(self, llm_client: Optional[Any] = None, search_adapter: Optional[Any] = None, context: Optional[AgentContext] = None):
+		"""Construct a ResearchAgent.
+
+		Preferred: pass a typed `context` containing `llm_client` and
+		`search_adapter`. For backward compatibility callers may still pass
+		`llm_client` and `search_adapter` as positional args.
+		"""
+		# Priority resolution: explicit context -> explicit args -> None
+		if context is not None:
+			self.llm = context.llm_client
+			self.search = context.search_adapter
+		else:
+			self.llm = llm_client
+			self.search = search_adapter
 
 	def plan(self, scope: Scope) -> List[ResearchTask]:
 		"""Create a small list of ResearchTask from the provided Scope.
@@ -55,6 +66,10 @@ class ResearchAgent:
 		the response length (clipped to [0,1]) and feedback includes the raw LLM
 		output.
 		"""
+		# Ensure an LLM client is available
+		if self.llm is None:
+			raise RuntimeError("ResearchAgent.run called without an llm_client configured")
+
 		# Prefer model-in / model-out when available on the LLM client.
 		if hasattr(self.llm, "generate_model"):
 			try:
