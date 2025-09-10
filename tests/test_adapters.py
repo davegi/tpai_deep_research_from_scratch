@@ -34,7 +34,10 @@ async def test_mock_search_adapter_return_serp_reply():
             source = raw.get('source') if isinstance(raw, dict) else None
             assert_that(source, description="each result raw.source should be 'mock'").is_equal_to('mock')
         else:
-            assert_that(getattr(r, 'raw', None) and r.raw.get('source'), description="each result raw.source should be 'mock'").is_equal_to('mock')
+            raw = getattr(r, 'raw', None)
+            assert_that(raw, description="each result raw should be present").is_not_none()
+            source = raw.get('source') if isinstance(raw, dict) else None
+            assert_that(source, description="each result raw.source should be 'mock'").is_equal_to('mock')
 
 
 @pytest.mark.asyncio
@@ -57,4 +60,7 @@ async def test_mock_search_adapter_backwards_compatibility():
             source = raw.get('source') if isinstance(raw, dict) else None
             assert_that(source, description="legacy result raw.source should be 'mock'").is_equal_to('mock')
         else:
-            assert_that(getattr(r, 'raw', None) and r.raw.get('source'), description="legacy result raw.source should be 'mock'").is_equal_to('mock')
+            raw = getattr(r, 'raw', None)
+            assert_that(raw, description="legacy result raw should be present").is_not_none()
+            source = raw.get('source') if isinstance(raw, dict) else None
+            assert_that(source, description="legacy result raw.source should be 'mock'").is_equal_to('mock')

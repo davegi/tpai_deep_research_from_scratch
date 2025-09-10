@@ -4,6 +4,8 @@ from typing import cast
 from research_agent_framework.adapters.search.mock_search import MockSearchAdapter
 from research_agent_framework.adapters.search.schema import SerpRequest, SerpReply
 from research_agent_framework.models import SerpResult
+from typing import cast
+from assertpy import assert_that
 
 
 @pytest.mark.asyncio
@@ -12,11 +14,12 @@ async def test_mock_search_empty_query_backcompat_and_serpreply():
     # Back-compat string call
     res = await adapter.search("")
     if isinstance(res, list):
-        assert res == []
+        assert_that(res).is_equal_to([])
     else:
         # New contract: SerpReply with empty results
-        assert isinstance(res, SerpReply)
-        assert list(res.results) == []
+        assert_that(res).is_instance_of(SerpReply)
+        reply = cast(SerpReply, res)
+        assert_that(list(reply.results)).is_equal_to([])
 
 
 @pytest.mark.asyncio
@@ -24,9 +27,10 @@ async def test_mock_search_serprequest_limit_zero_returns_empty_reply():
     adapter = MockSearchAdapter()
     req = SerpRequest(query="some query", limit=0)
     reply = await adapter.search(req)
-    assert isinstance(reply, SerpReply)
-    assert list(reply.results) == []
-    assert getattr(reply.meta, 'total_results', 0) == 0
+    assert_that(reply).is_instance_of(SerpReply)
+    reply = cast(SerpReply, reply)
+    assert_that(list(reply.results)).is_equal_to([])
+    assert_that(getattr(reply.meta, 'total_results', 0)).is_equal_to(0)
 
 
 def test_serpresult_from_raw_rejects_non_dict():

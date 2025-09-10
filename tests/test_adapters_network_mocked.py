@@ -26,9 +26,10 @@ def test_serpapi_adapter_handles_mocked_response():
         import asyncio
 
         async def run():
+            from assertpy import assert_that
             reply = await adapter.search(SerpRequest(query="q", limit=1))
-            assert reply.meta.total_results == 1
-            assert reply.results[0].title == "Mocked title"
+            assert_that(reply.meta.total_results).is_equal_to(1)
+            assert_that(reply.results[0].title).is_equal_to("Mocked title")
 
         asyncio.run(run())
 
@@ -44,8 +45,9 @@ def test_tavily_adapter_handles_mocked_response():
         import asyncio
 
         async def run():
+            from assertpy import assert_that
             reply = await adapter.search(SerpRequest(query="q", limit=1))
-            assert reply.meta.total_results == 1
-            assert reply.results[0].title == "Tavily item"
+            assert_that(reply.meta.total_results).is_equal_to(1)
+            assert_that(reply.results[0].title).is_equal_to("Tavily item")
 
         asyncio.run(run())

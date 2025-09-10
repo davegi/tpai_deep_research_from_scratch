@@ -4,6 +4,7 @@ from deep_research_from_scratch.state_multi_agent_supervisor import SupervisorSt
 from research_agent_framework.config import get_settings
 from langchain_core.messages import SystemMessage, ToolMessage
 from langgraph.types import Command
+from assertpy import assert_that
 
 
 async def _run_supervisor_with_tool_calls(tool_calls, policy="record_and_continue"):
@@ -29,8 +30,8 @@ def test_record_and_continue_policy_event_loop():
         # but we will simulate by passing a fake tool call structure that triggers the code path.
         tool_calls = [{"name": "ConductResearch", "id": "1", "args": {"research_topic": "X"}}]
         cmd = await _run_supervisor_with_tool_calls(tool_calls, policy="record_and_continue")
-        assert isinstance(cmd, Command)
-        assert cmd.goto in ("supervisor", "__end__")
+        assert_that(cmd).is_instance_of(Command)
+        assert_that((cmd.goto == "supervisor") or (cmd.goto == "__end__")).is_true()
 
     asyncio.run(run())
 
@@ -39,8 +40,8 @@ def test_fail_fast_policy_event_loop():
     async def run():
         tool_calls = [{"name": "ConductResearch", "id": "1", "args": {"research_topic": "X"}}]
         cmd = await _run_supervisor_with_tool_calls(tool_calls, policy="fail_fast")
-        assert isinstance(cmd, Command)
+        assert_that(cmd).is_instance_of(Command)
         # When fail_fast and a researcher error occurs, supervisor_tools should decide to END
-        assert cmd.goto == "__end__" or cmd.goto == "supervisor"
+        assert_that((cmd.goto == "__end__") or (cmd.goto == "supervisor")).is_true()
 
     asyncio.run(run())

@@ -1,6 +1,7 @@
 from research_agent_framework.agents.scoring import SimpleScorer
 from research_agent_framework.models import SerpResult, Location, Coordinates, Rating
 from research_agent_framework.agents.base import ScoreResult
+from assertpy import assert_that
 from typing import cast
 from types import SimpleNamespace
 from pydantic import HttpUrl
@@ -19,24 +20,24 @@ def test_simple_scorer_with_rating_and_distance():
     rating = Rating(score=4.0, count=10)
     s = make_serp(rating=rating, distance=100.0, price=None)
     res = scorer.score(s)
-    assert isinstance(res, ScoreResult)
-    assert 0.0 <= res.score <= 1.0
+    assert_that(res).is_instance_of(ScoreResult)
+    assert_that(res.score).is_between(0.0, 1.0)
 
 
 def test_simple_scorer_with_price_effects():
     scorer = SimpleScorer()
     r = make_serp(price="cheap", distance=500.0)
     res = scorer.score(r)
-    assert isinstance(res, ScoreResult)
-    assert res.score >= 0.0
+    assert_that(res).is_instance_of(ScoreResult)
+    assert_that(res.score).is_greater_than_or_equal_to(0.0)
 
 
 def test_simple_scorer_location_only():
     scorer = SimpleScorer()
     loc = Location(coords=Coordinates(lat=0.0, lon=0.0), distance=0)
     res = scorer.score(loc)
-    assert isinstance(res, ScoreResult)
-    assert res.score >= 0.0
+    assert_that(res).is_instance_of(ScoreResult)
+    assert_that(res.score).is_greater_than_or_equal_to(0.0)
 
 
 def test_preference_weight_applies():
@@ -45,7 +46,7 @@ def test_preference_weight_applies():
     s = make_serp(rating=rating, distance=10)
     res1 = scorer.score(s)
     res2 = scorer.score(s, preferences={"weight": 0.5})
-    assert res2.score <= res1.score
+    assert_that(res2.score).is_less_than_or_equal_to(res1.score)
 
 
 def test_clamping_and_nan_distance():
@@ -54,8 +55,8 @@ def test_clamping_and_nan_distance():
     rating = SimpleNamespace(score=1000.0)
     item = SimpleNamespace(location=None, rating=rating, price_level=None)
     res = scorer.score(item)
-    assert isinstance(res, ScoreResult)
-    assert 0.0 <= res.score <= 1.0
+    assert_that(res).is_instance_of(ScoreResult)
+    assert_that(res.score).is_between(0.0, 1.0)
 
 
 def test_pint_quantity_distance_handling():
@@ -71,5 +72,5 @@ def test_pint_quantity_distance_handling():
     rating = Rating(score=4.0)
     s = make_serp(rating=rating, distance=q)
     res = scorer.score(s)
-    assert isinstance(res, ScoreResult)
-    assert 0.0 <= res.score <= 1.0
+    assert_that(res).is_instance_of(ScoreResult)
+    assert_that(res.score).is_between(0.0, 1.0)

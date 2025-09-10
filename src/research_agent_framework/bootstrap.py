@@ -6,7 +6,7 @@ tracebacks - configures `loguru` with settings from `config.get_settings()`
 The function is idempotent and safe to call multiple times.
 """
 import threading
-from typing import Optional
+from typing import Optional, cast
 
 from assertpy import assert_that
 from environs import Env
@@ -98,7 +98,9 @@ def bootstrap(force: bool = False) -> None:
 
         assert_that(console).is_not_none()
         # Help type-checkers: `c` must be a Console here.
-        assert c is not None
+        assert_that(c).is_not_none()
+        # Narrow type for static type checkers: after the is_not_none() guard `c` is a Console
+        c = cast(Console, c)
 
         # Configure loguru logger to write to the shared Console (preserving formatting)
         _logger.remove()

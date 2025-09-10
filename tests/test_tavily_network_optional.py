@@ -3,6 +3,7 @@ import pytest
 
 from research_agent_framework.adapters.search.tavily_search import TavilySearchAdapter
 from research_agent_framework.adapters.search.schema import SerpRequest
+from assertpy import assert_that
 
 
 @pytest.mark.skipif(
@@ -14,6 +15,6 @@ def test_tavily_network_search_runs():
 
     async def run():
         reply = await adapter.search(SerpRequest(query="museum near me", limit=1))
-        assert reply.meta.provider is not None
+        assert_that(reply.meta.provider).is_not_none()
 
     asyncio.run(run())

@@ -6,6 +6,7 @@ from deep_research_from_scratch.state_multi_agent_supervisor import SupervisorSt
 from research_agent_framework.config import get_settings
 from langchain_core.messages import SystemMessage
 from langgraph.types import Command
+from assertpy import assert_that
 
 
 async def _run_with_stubbed_researchers(tool_calls, stub_behavior, policy="record_and_continue"):
@@ -69,14 +70,14 @@ def test_record_and_continue_mixed_results():
             {"name": "ConductResearch", "id": "t2", "args": {"research_topic": "FAIL-THIS"}},
             {"name": "ConductResearch", "id": "t3", "args": {"research_topic": "GOOD2"}},
         ]
-
         cmd = await _run_with_stubbed_researchers(tool_calls, stub_behavior, policy="record_and_continue")
-        assert isinstance(cmd, Command)
+        assert_that(cmd).is_instance_of(Command)
         # Should continue (not forced end) or may indicate supervisor step; ensure successful results are present
         # Ensure command update exists and contains evidence of successful results
-        assert cmd.update is not None
+        assert_that(cmd.update).is_not_none()
         out = str(cmd.update)
-        assert ("GOOD1" in out) or ("GOOD2" in out)
+        # Ensure at least one of the expected substrings appears in the update
+        assert_that(("GOOD1" in out) or ("GOOD2" in out)).is_true()
 
     asyncio.run(run())
 
@@ -92,10 +93,9 @@ def test_fail_fast_mixed_results():
             {"name": "ConductResearch", "id": "t1", "args": {"research_topic": "GOOD1"}},
             {"name": "ConductResearch", "id": "t2", "args": {"research_topic": "FAIL-THIS"}},
         ]
-
         cmd = await _run_with_stubbed_researchers(tool_calls, stub_behavior, policy="fail_fast")
-        assert isinstance(cmd, Command)
+        assert_that(cmd).is_instance_of(Command)
         # When fail_fast is configured and a researcher raises, supervisor should decide to end
-        assert cmd.goto == "__end__" or cmd.goto == "supervisor"
+        assert_that((cmd.goto == "__end__") or (cmd.goto == "supervisor")).is_true()
 
     asyncio.run(run())

@@ -12,8 +12,9 @@ def test_bootstrap_wiring_idempotent_and_console_logger():
     c2 = get_console()
     l2 = get_logger()
 
-    assert c1 is not None
-    assert l1 is not None
+    from assertpy import assert_that
+    assert_that(c1).is_not_none()
+    assert_that(l1).is_not_none()
     # Repeated bootstrap should not replace console/logger instance
-    assert c1 is c2
-    assert l1 is l2
+    assert_that(c1 is c2).is_true()
+    assert_that(l1 is l2).is_true()
