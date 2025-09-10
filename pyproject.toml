@@ -22,10 +22,11 @@ dependencies = [
   "environs>=14.3.0",
   "assertpy>=1.1",
   "pydantic-settings>=2.10.1",
+  "httpx>=0.24.1",
 ]
 
 [project.optional-dependencies]
-dev = ["mypy>=1.17.1", "ruff>=0.12.12", "pytest>=8.4.2", "pydantic-extra-types>=0.12.0", "pint>=0.20.0", "hypothesis>=6.88.0"]
+dev = ["mypy>=1.17.1", "ruff>=0.12.12", "pytest>=8.4.2", "pydantic-extra-types>=0.12.0", "pint>=0.20.0", "hypothesis>=6.88.0", "respx>=0.20.0"]
 
 [build-system]
 requires = ["setuptools>=73.0.0", "wheel"]

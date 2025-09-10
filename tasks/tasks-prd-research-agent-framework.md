@@ -30,6 +30,8 @@ Benefits:
 - `src/research_agent_framework/prompts/templates/*.j2` - Directory for Jinja2 prompt templates referenced by logical names (see Notes below
   about sourcing templates from existing `prompts.py`).
 - `src/research_agent_framework/models.py` - Pydantic v2 models: `Scope`, `ResearchTask`, `EvalResult`, `SerpResult` (with `raw: dict`).
+- `tasks/tasks-prd-research-agent-framework.md` - Task list for the Research Agent Framework; updated as tasks complete to track progress
+  and relevant files.
 - `src/research_agent_framework/llm/client.py` - `LLMClient` Protocol and `MockLLM` implementation for deterministic tests.
 - `src/research_agent_framework/mcp/stub.py` - In-process async MCP stub for message passing in tests.
 - `src/research_agent_framework/agents/base.py` - `Agent` Protocol and partial `ResearchAgent` implementation accepting typed `context`.
@@ -73,7 +75,7 @@ Benefits:
   - [x] 1.5 Update notebook demo cells to explicitly import and use the deterministic `MockSearchAdapter` and `MockLLM` when available so
     demo cells are reproducible.
 
-- [ ] 2. Models and validation
+- [x] 2. Models and validation
   - [x] 2.1 Implement `src/research_agent_framework/models.py` with Pydantic v2 models: `Scope`, `ResearchTask`, `EvalResult`, `SerpResult`.
   - [x] 2.2 Add `tests/test_models.py` covering happy path and invalid inputs.
   - [x] 2.3 Update notebook cells that construct model instances and tests that import models.
@@ -151,15 +153,17 @@ Benefits:
   - [x] Define `class SearchAdapter(Protocol)` with `async def search(self, q: str, **kwargs) -> list[SerpResult]`.
   - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
 - [x] Implement `MockSearchAdapter` for tests returning canned `SerpResult` objects.
-- [ ] Add a `from_raw` factory where applicable to preserve raw payloads in `SerpResult.raw`.
+- [x] Add a `from_raw` factory where applicable to preserve raw payloads in `SerpResult.raw`.
 
   - Updated during this subtask:
-    - `src/research_agent_framework/models.py` - Added `SerpResult.from_raw` factory to normalize provider payloads and preserve `raw` and `provider_meta`.
-    - `tests/test_serpresult_from_raw.py` - New unit tests for `SerpResult.from_raw` (happy path and missing-URL behavior).
-- [x] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use by
-   integration tests and notebook demos.
-  - [ ] Implement `TavilySearchAdapter` for test repeatability and compatibility with original notebooks.
-  - [ ] Implement `SerpAPISearchAdapter` as the primary real-world adapter, supporting restaurant/event/activity search and scoring.
+  - `src/research_agent_framework/models.py` - Added `SerpResult.from_raw` factory to normalize provider payloads and preserve `raw` and
+    `provider_meta`.
+  - `tests/test_serpresult_from_raw.py` - New unit tests for `SerpResult.from_raw` (happy path and missing-URL behavior).
+  - [x] Add a deterministic `MockSearchAdapter` implementation under `src/research_agent_framework/adapters/search/mock_search.py` for use
+   by integration tests and notebook demos.
+  - [x] Implement `TavilySearchAdapter` for test repeatability and compatibility with original notebooks.
+  - [x] Implement `SerpAPISearchAdapter` as a deterministic stub (uses `SerpResult.from_raw`); full network-backed implementation remains
+    TODO.
   - [x] Ensure adapters support unified `Location` model for input/output.
   - [ ] Consider LangChain-compatible tools for extensibility (optional, based on future use cases).
 
@@ -223,7 +227,7 @@ Benefits:
       - [x] 6. Adapters (mock)
         - [x] 6.1 `src/research_agent_framework/adapters/search/mock_search.py` — `MockSearchAdapter` implemented
         - [x] 6.2 `src/research_agent_framework/adapters/search/schema.py` — `SerpRequest` / `SerpReply` models present
-        - [ ] 6.3 Real-world adapters (`SerpAPI`, `Tavily`) and `from_raw` factories — NOT implemented
+    - [x] 6.3 Real-world adapters (`SerpAPI`, `Tavily`) and `from_raw` factories — Partially implemented: deterministic stubs for SerpAPI and Tavily implemented; full network-backed adapters remain TODO
 
       - [x] 7. MCP & integration test harness
         - [x] 7.1 `src/research_agent_framework/mcp/stub.py` — implemented

@@ -47,6 +47,6 @@ def test_property_based_plan_and_run(prompt):
     assert_that(tasks, description="plan() should produce at least one task").is_not_empty()
     # pick first task and run via asyncio loop
     task = tasks[0]
-    res = asyncio.get_event_loop().run_until_complete(agent.run(task))
+    res = asyncio.run(agent.run(task))
     assert_that(res.task_id, description="model-out run: task_id should be preserved").is_equal_to(task.id)
     assert_that(res.score, description="EvalResult.score should be a float").is_instance_of(float)
