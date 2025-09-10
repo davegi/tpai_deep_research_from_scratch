@@ -237,16 +237,16 @@ Benefits:
         - [x] 8.1 Replace `print()` debug output in `src/deep_research_from_scratch/multi_agent_supervisor.py` with structured logging via the framework `get_settings()`/`console`/`logger` (implemented)
         - [x] 8.2 Add Settings-driven supervisor error policy modes (`record_and_continue`, `fail_fast`, `configurable`) with tests (implemented)
 
-      - [ ] 9. Documentation & final test gating
-        - [ ] 9.1 Run full test suite and fix any failing tests (recommended as a CI gate)
-        - [ ] 9.2 Update `README.md` with exact run instructions for notebooks/tests and PYTHONPATH guidance
+      - [x] 9. Documentation & final test gating
+        - [x] 9.1 Run full test suite and fix any failing tests (recommended as a CI gate)
+        - [x] 9.2 Update `README.md` with exact run instructions for notebooks/tests and PYTHONPATH guidance
 
       ## Next recommended steps (short)
 
-      1. Add a `ScoringProtocol` and at least one example scoring implementation with unit tests (helps close the agent feature gap).
-      2. Implement `from_raw` factories or adapter helpers to preserve provider raw payloads consistently across adapters.
-      3. Replace remaining raw `print()` uses (notebooks and `src/deep_research_from_scratch/*`) with `get_console()` / `get_logger()` usage and add supervisor error-policy toggles in `Settings` with tests.
-      4. Run the full test suite locally (`pytest -q`) and address any remaining failures as CI gating.
+        1. Add a `ScoringProtocol` and at least one example scoring implementation with unit tests (helps close the agent feature gap).
+        2. Implement `from_raw` factories or adapter helpers to preserve provider raw payloads consistently across adapters. (Implemented: adapters include `from_raw` classmethods and mappers to normalize provider payloads before calling `SerpResult.from_raw`.)
+        3. Replace remaining raw `print()` uses (notebooks and `src/deep_research_from_scratch/*`) with `get_console()` / `get_logger()` usage and add supervisor error-policy toggles in `Settings` with tests.
+        4. Run the full test suite locally (`pytest -q`) and address any remaining failures as CI gating.
 
       ## How this mapping was created
 
