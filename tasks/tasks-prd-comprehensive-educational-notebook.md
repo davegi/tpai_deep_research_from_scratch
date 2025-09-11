@@ -51,12 +51,13 @@
   - [x] 3.0 Implement environment bootstrap and configuration walkthrough
     - [x] 3.1 Show bootstrap invocation and rich console output
     - [x] 3.2 Display resolved settings and notable defaults
-    - [x] 3.3 Explain configuration impact on behavior and logging (notebook includes settings table, explanatory text, and a safe reload demo)
+    - [x] 3.3 Explain configuration impact on behavior and logging (notebook includes settings table, explanatory text, and a safe reload
+      demo)
 
-- [ ] 4.0 Document env vars and configuration impact (adjacent to bootstrap)
-  - [ ] 4.1 List required/optional env vars (e.g., SERPAPI_API_KEY, TAVILY_API_KEY)
-  - [ ] 4.2 Demonstrate safe defaults and fallback behavior without keys
-  - [ ] 4.3 Show how env toggles switch between mock/live providers
+- [x] 4.0 Document env vars and configuration impact (adjacent to bootstrap)
+  - [x] 4.1 List required/optional env vars (e.g., SERPAPI_API_KEY, TAVILY_API_KEY)
+  - [x] 4.2 Demonstrate safe defaults and fallback behavior without keys
+  - [x] 4.3 Show how env toggles switch between mock/live providers
 
 - [ ] 5.0 Set up LLM clients with options and toggles
   - [ ] 5.1 Present `llm_factory` usage and provider selection
