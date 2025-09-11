@@ -1,12 +1,16 @@
 """Bootstrap helper for research_agent_framework.
 
-Provides `bootstrap()` which: - reads a `.env` file via `environs.Env().read_env()` if available - installs `rich.traceback` for pretty
-tracebacks - configures `loguru` with settings from `config.get_settings()`
+`bootstrap()` performs early environment and logging setup:
+- reads a `.env` file via `environs.Env().read_env()` if available
+- installs `rich.traceback` for pretty tracebacks
+- ensures a shared `Console` exists via `get_settings().console`
+- wires global Loguru logger to the Console using current settings
 
-The function is idempotent and safe to call multiple times.
+The function is idempotent and safe to call multiple times; pass `force=True`
+to re-run wiring.
 """
 import threading
-from typing import Optional, cast
+from typing import cast
 
 from assertpy import assert_that
 from environs import Env
@@ -14,14 +18,11 @@ from loguru import logger as _logger
 from rich import traceback as _rich_traceback
 from rich.console import Console
 
-from .config import get_settings, get_console, get_logger
+from .config import get_settings
 
 # Keep a simple module-level lock and flag for idempotence
 _bootstrap_lock = threading.Lock()
 _bootstrapped = False
-# Exportable console and logger for other modules to import
-console: Optional[Console] = None
-logger = _logger
 
 
 def bootstrap(force: bool = False) -> None:
@@ -30,7 +31,7 @@ def bootstrap(force: bool = False) -> None:
     This simplified bootstrap assumes `environs`, `loguru`, and `rich` are available.
     It's idempotent and will re-run only when `force=True`.
     """
-    global _bootstrapped, console, logger
+    global _bootstrapped
     with _bootstrap_lock:
         if _bootstrapped and not force:
             return
@@ -50,56 +51,18 @@ def bootstrap(force: bool = False) -> None:
         # Install rich traceback
         _rich_traceback.install()
 
-        # Create or reuse the shared Console for the application (tests patch this via bootstrap.Console)
+        # Ensure shared Console exists via settings property; tolerate missing attribute in tests
         settings = get_settings()
-        # If force=True we should recreate the Console using the module-level
-        # `Console` constructor so tests that monkeypatch that constructor are
-        # exercised. Otherwise prefer an existing module-level console, then
-        # settings.console, and finally construct a new Console.
-        if force:
-            # Re-run bootstrap actions. Recreate the Console only when:
-            # - there is no existing module-level console, or
-            # - the existing console is NOT an instance of the currently-imported
-            #   `Console` class (this ensures tests that monkeypatch
-            #   `bootstrap.Console` get exercised),
-            # otherwise reuse the existing console to preserve idempotence.
-            try:
-                if console is not None and isinstance(console, Console):
-                    c = console
-                else:
-                    c = Console()
-            except Exception:
-                # fall back to any existing console or settings.console if constructor fails
-                c = console
-                try:
-                    existing = getattr(settings, "console", None)
-                    if c is None and existing is not None:
-                        c = existing
-                except Exception:
-                    pass
-        else:
-            if console is not None:
-                c = console
-            else:
-                try:
-                    existing = getattr(settings, "console", None)
-                except Exception:
-                    existing = None
-                if existing is not None:
-                    c = existing
-                else:
-                    c = Console()
-        console = c
-        # Also make sure Settings holds a reference so get_console() and consumers reuse it
         try:
-            settings.console = c
-        except Exception:
-            pass
-
-        assert_that(console).is_not_none()
-        # Help type-checkers: `c` must be a Console here.
+            c = settings.console
+        except AttributeError:
+            # Create and attach a Console dynamically if tests provide a minimal DummySettings
+            c = Console()
+            try:
+                setattr(settings, "console", c)
+            except Exception:
+                pass
         assert_that(c).is_not_none()
-        # Narrow type for static type checkers: after the is_not_none() guard `c` is a Console
         c = cast(Console, c)
 
         # Configure loguru logger to write to the shared Console (preserving formatting)
@@ -109,6 +72,3 @@ def bootstrap(force: bool = False) -> None:
         _logger.add(lambda m: c.print(str(m), end=""), level=settings.logging.level, format=settings.logging.fmt)
 
         _bootstrapped = True
-
-    # expose module-level logger alias
-    logger = _logger

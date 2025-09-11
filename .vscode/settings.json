@@ -3,16 +3,19 @@
   "python-envs.pythonProjects": [],
 
   "cSpell.words": [
+    "autoreload",
     "capsys",
     "checkpointer",
     "dataclasses",
     "dotenv",
+    "evals",
     "filterwarnings",
     "getipython",
     "huggingface",
     "kernelspec",
     "loguru",
     "mockllm",
+    "modelcontextprotocol",
     "pathlib",
     "ppython",
     "pycodestyle",
@@ -26,5 +29,6 @@
     "."
   ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "kiroAgent.configureMCP": "Disabled"
 }
