@@ -1,12 +1,13 @@
 """Helper utilities to determine whether to use mock or live providers.
 
 This centralizes the small environment-driven logic used by the notebook demos
-so the behaviour can be unit-tested.
+so the behavior can be unit-tested.
 """
 import os
 from typing import Optional
 
 from research_agent_framework.config import get_settings
+from contextlib import contextmanager
 
 
 def use_mock_search(settings=None) -> bool:
@@ -49,3 +50,35 @@ def use_mock_llm(settings=None) -> bool:
     if str(name).lower().startswith("mock"):
         return True
     return False
+
+
+@contextmanager
+def apply_switchboard(force_mock: bool | None = None):
+    """Context manager to temporarily apply a centralized switchboard.
+
+    - If `force_mock` is True, sets `FORCE_USE_MOCK=1` in the environment for the
+      context duration.
+    - If `force_mock` is False, ensures `FORCE_USE_MOCK` is unset for the context.
+    - If `force_mock` is None, leaves environment untouched.
+
+    This helper is intentionally small and deterministic so notebook code and
+    tests can toggle behavior in one guarded place.
+    """
+    if force_mock is None:
+        # No-op context
+        yield
+        return
+
+    old = os.environ.get("FORCE_USE_MOCK")
+    try:
+        if force_mock:
+            os.environ["FORCE_USE_MOCK"] = "1"
+        else:
+            os.environ.pop("FORCE_USE_MOCK", None)
+        yield
+    finally:
+        # Restore previous state
+        if old is None:
+            os.environ.pop("FORCE_USE_MOCK", None)
+        else:
+            os.environ["FORCE_USE_MOCK"] = old
