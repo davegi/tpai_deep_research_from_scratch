@@ -1,0 +1,22 @@
+{# Final Report Generation Template #}
+
+# Final Research Report
+
+## Research Brief
+{{ research_brief }}
+
+## Findings
+{% for finding in findings %}
+- {{ finding }}
+{% endfor %}
+
+---
+Today's date is {{ date }}.
+
+{# Sources section can be added if sources are available #}
+{% if sources %}
+## Sources
+{% for source in sources %}
+- [{{ source.title }}]({{ source.url }})
+{% endfor %}
+{% endif %}

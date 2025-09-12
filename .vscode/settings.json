@@ -24,7 +24,8 @@
     "pyflakes",
     "Serp",
     "SERPAPI",
-    "setuptools"
+    "setuptools",
+    "Sightglass"
   ],
   "python.testing.pytestArgs": [
     "."

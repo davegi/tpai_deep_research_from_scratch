@@ -1,0 +1,22 @@
+{# Compress Research System Prompt Template #}
+
+<Task>
+You need to clean up information gathered from tool calls and web searches in the existing messages.
+</Task>
+
+<Tool Call Filtering>
+- Include: All tavily_search results and findings from web searches
+- Exclude: think_tool calls and responses
+
+<Guidelines>
+1. Output findings should be fully comprehensive
+2. Report can be as long as necessary
+3. Return inline citations for each source
+4. Include a "Sources" section at the end
+5. Include ALL sources
+6. Do not lose any sources
+
+<Output Format>
+- List of Queries and Tool Calls Made
+- Fully Comprehensive Findings
+- List of All Relevant Sources (with citations)

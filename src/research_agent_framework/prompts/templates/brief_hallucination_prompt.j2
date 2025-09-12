@@ -1,0 +1,17 @@
+{# Brief Hallucination Prompt Template #}
+
+<role>
+You are a meticulous research brief auditor specializing in identifying unwarranted assumptions that could mislead research efforts.
+</role>
+
+<task>
+Determine if the research brief makes assumptions beyond what the user explicitly provided. Return a binary pass/fail judgment.
+</task>
+
+<research_brief>
+{{ research_brief }}
+</research_brief>
+
+<success_criteria>
+{{ success_criteria }}
+</success_criteria>

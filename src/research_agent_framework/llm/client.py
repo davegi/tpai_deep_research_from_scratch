@@ -102,6 +102,19 @@ class MockLLM:
     def __init__(self, config: LLMConfig):
         self.config = config
     async def generate(self, prompt: str, **kwargs) -> str:
+        # Only synthesize a report if the prompt matches the final_report_generation template structure
+        if "# Final Research Report" in prompt and "## Research Brief" in prompt and "## Findings" in prompt:
+            import re
+            brief_match = re.search(r"## Research Brief\n(.*?)\n## Findings", prompt, re.DOTALL)
+            findings_match = re.findall(r"- (.+)", prompt)
+            brief = brief_match.group(1).strip() if brief_match else "Research topic not found."
+            findings = findings_match if findings_match else ["No findings provided."]
+            report = ["# Final Research Report\n", f"## Research Brief\n{brief}\n", "## Findings\n"]
+            for finding in findings:
+                report.append(f"- {finding}\n")
+            report.append("\n---\nThis is a synthesized mock report for demonstration purposes.")
+            return "".join(report)
+        # Otherwise, return a generic mock response for compatibility with all tests
         return f"mock response for: {prompt}"
 
     async def generate_model(self, input_model: BaseModel, output_model: Type[BaseModel], **kwargs) -> BaseModel:

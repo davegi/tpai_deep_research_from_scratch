@@ -83,10 +83,10 @@
   - [x] 10.2 Synthesize findings into structured objects
   - [x] 10.3 Validate synthesized outputs and display with rich
 
-- [ ] 11.0 Generate final report with rich output
-  - [ ] 11.1 Assemble report sections and metadata
-  - [ ] 11.2 Verify formatting against renderer tests
-  - [ ] 11.3 Provide downloadable artifact (e.g., markdown export)
+- [x] 11.0 Generate final report with rich output
+- [x] 11.1 Assemble report sections and metadata
+- [x] 11.2 Verify formatting against renderer tests
+- [x] 11.3 Provide downloadable artifact (e.g., markdown export)
 
 - [ ] 12.0 Integrate structured logging and LangSmith tracing (after final report & toggles)
   - [ ] 12.1 Enable structured logs around key steps
