@@ -65,14 +65,14 @@
   - [x] 6.2 Default to mocks; clearly label live-call cells
   - [x] 6.3 Include a single "switchboard" helper cell to centralize toggles
 
-- [ ] 7.0 Implement user clarification and scoping demo
-  - [ ] 7.2 Show iterative refinement using deterministic responses
-  - [ ] 7.3 Capture scope state object and validation
+- [x] 7.0 Implement user clarification and scoping demo
+  - [x] 7.2 Show iterative refinement using deterministic responses
+  - [x] 7.3 Capture scope state object and validation
 
-- [ ] 8.0 Generate research brief aligned with tests
-  - [ ] 8.1 Produce brief using the same models/fixtures as tests
-  - [ ] 8.2 Validate brief fields with assertpy
-  - [ ] 8.3 Render brief with rich output consistent with test snapshots
+- [x] 8.0 Generate research brief aligned with tests
+  - [x] 8.1 Produce brief using the same models/fixtures as tests
+  - [x] 8.2 Validate brief fields with assertpy
+  - [x] 8.3 Render brief with rich output consistent with test snapshots
 
 - [ ] 9.0 Implement multi-agent coordination workflow demo
   - [ ] 9.1 Demonstrate supervisor policy with deterministic steps

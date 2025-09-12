@@ -1,3 +1,27 @@
+def test_scope_state_capture_and_validation():
+    """
+    Mirrors notebook: validates scope state object after clarification.
+    """
+    from deep_research_from_scratch.research_agent_scope import scope_research, AgentInputState
+    from langchain_core.messages import HumanMessage
+    from assertpy import assert_that
+
+    from typing import Sequence
+    from langchain_core.messages import AnyMessage
+    from typing import cast
+    user_messages = [
+        HumanMessage(content="Find the best coffee shops in SF."),
+        HumanMessage(content="I want places open now and not paid."),
+        HumanMessage(content="No cover charge, open now, highest ratings in SOMA.")
+    ]
+    input_state = AgentInputState(messages=cast(list[AnyMessage], user_messages))
+    from research_agent_framework.config import get_console
+    from rich.markdown import Markdown
+    console = get_console()
+    result = scope_research.invoke(input_state)
+    assert_that(result).contains_key("research_brief")
+    assert_that(result["research_brief"]).is_not_empty()
+    console.print(Markdown(f"**Research brief:**\n\n{result['research_brief']}"))
 import pytest
 import asyncio
 from hypothesis import given, strategies as st
