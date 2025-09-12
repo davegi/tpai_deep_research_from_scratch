@@ -88,10 +88,19 @@
 - [x] 11.2 Verify formatting against renderer tests
 - [x] 11.3 Provide downloadable artifact (e.g., markdown export)
 
-- [ ] 12.0 Integrate structured logging and LangSmith tracing (after final report & toggles)
-  - [ ] 12.1 Enable structured logs around key steps
-  - [ ] 12.2 Add optional LangSmith tracing hooks (guarded by env var)
-  - [ ] 12.3 Show minimal trace visualization or link to UI
+- [x] 12.0 Integrate structured logging and LangSmith tracing (after final report & toggles)
+  - [x] 12.1 Enable structured logs around key steps
+  - [x] 12.2 Add optional LangSmith tracing hooks (guarded by env var)
+  - [x] 12.3 Show minimal trace visualization or link to UI
+
+---
+
+- **12.0 Logging and Tracing Integration**
+
+- Structured logging is enabled throughout the codebase and notebook using the shared logger. LangSmith tracing is optionally enabled via the
+`ENABLE_TRACING` environment variable or settings. When enabled, traces are sent to LangSmith for inspection and debugging.
+- The notebook demonstrates how to toggle tracing, and provides a link to the LangSmith UI for trace visualization. All four artifacts (notebook, code,
+tests, tasks) are in sync for logging and tracing features.
 
 - [ ] 13.0 Compare prompts and LLM settings side-by-side
   - [ ] 13.1 Vary prompts; compare outputs deterministically

@@ -45,7 +45,7 @@ def bootstrap(force: bool = False) -> None:
                 env.read_env(env_path)
             else:
                 env.read_env()
-        except FileNotFoundError:
+        except Exception:
             pass
 
         # Install rich traceback
@@ -65,10 +65,35 @@ def bootstrap(force: bool = False) -> None:
         assert_that(c).is_not_none()
         c = cast(Console, c)
 
-        # Configure loguru logger to write to the shared Console (preserving formatting)
+        # Configure std logging to use RichHandler
+        import logging
+        from rich.logging import RichHandler
+        std_fmt = '%(asctime)s %(levelname)s %(message)s'
+        logging.basicConfig(
+            level=settings.logging.level,
+            format=std_fmt,
+            handlers=[RichHandler(console=c, rich_tracebacks=True)]
+        )
+
+        # Configure loguru logger to use Console.log for colorized output
         _logger.remove()
-        # Use the shared Console as the sink target. Convert the incoming message to str
-        # because loguru may pass rich objects.
-        _logger.add(lambda m: c.print(str(m), end=""), level=settings.logging.level, format=settings.logging.fmt)
+        def rich_loguru_sink(message):
+            record = message.record
+            level = record["level"].name
+            text = record["message"]
+            # Use style based on log level
+            style_map = {
+                "DEBUG": "dim",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "bold red",
+                "CRITICAL": "bold white on red",
+            }
+            style = style_map.get(level, "white")
+            c.log(f"[{level}] {text}", style=style)
+        _logger.add(rich_loguru_sink, level=settings.logging.level, format=settings.logging.fmt)
+
+        _bootstrapped = True
+        _logger.add(rich_loguru_sink, level=settings.logging.level, format=settings.logging.fmt)
 
         _bootstrapped = True

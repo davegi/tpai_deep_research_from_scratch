@@ -220,5 +220,10 @@ def test_bootstrap_env_read(tmp_path):
         env={**os.environ, "PYTHONPATH": src_path, "ENV_PATH": str(env_path)},
     )
 
+    if result.returncode != 0:
+        print("\n[DEBUG] Subprocess stdout:")
+        print(result.stdout)
+        print("[DEBUG] Subprocess stderr:")
+        print(result.stderr)
     assert_that(result.returncode).is_equal_to(0)
     assert_that(result.stdout.strip()).is_equal_to("from-env")
