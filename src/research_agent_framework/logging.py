@@ -30,6 +30,10 @@ class LoggingProtocol(Protocol):
         """Return the underlying logger instance."""
         pass
 
+    def addHandler(self, handler: Any) -> None: ...
+    def removeHandler(self, handler: Any) -> None: ...
+    def getHandlers(self) -> list: ...
+
 # ───────────────────────────────────────────────────────────── BaseLogger: abstract class with shared methods
 # ─────────────────────────────────────────────────────────────
 class BaseLogger(BaseModel, ABC):
@@ -68,6 +72,17 @@ class BaseLogger(BaseModel, ABC):
     @property
     def logger(self) -> Any:
         return self._logger
+
+    def addHandler(self, handler: Any) -> None:
+        if hasattr(self.logger, "addHandler"):
+            self.logger.addHandler(handler)
+    def removeHandler(self, handler: Any) -> None:
+        if hasattr(self.logger, "removeHandler"):
+            self.logger.removeHandler(handler)
+    def getHandlers(self) -> list:
+        if hasattr(self.logger, "handlers"):
+            return list(self.logger.handlers)
+        return []
 
     # Default implementations for all logging methods - use property for maintainability
     def debug(self, msg: str, *args, **kwargs) -> None:
@@ -110,6 +125,20 @@ class LoguruLogger(BaseLogger):
         if self._handler_id is not None:
             self._logger.remove(self._handler_id)
         self._handler_id = self._logger.add(self._sink, level=self._level, format=self._fmt)
+
+    def addHandler(self, handler: Any) -> None:
+        # Loguru does not use standard handlers, but we can add a sink
+        self._handler_id = self._logger.add(handler)
+    def removeHandler(self, handler: Any) -> None:
+        # Remove by handler id if possible
+        if isinstance(handler, int):
+            self._logger.remove(handler)
+        elif self._handler_id is not None:
+            self._logger.remove(self._handler_id)
+            self._handler_id = None
+    def getHandlers(self) -> list:
+        # Loguru does not expose handlers, but we can return the handler id
+        return [self._handler_id] if self._handler_id is not None else []
 
     def set_level(self, value: str):
         self._level = value
@@ -165,3 +194,10 @@ class StdLogger(BaseLogger):
     def fmt(self, value: str):
         self._fmt = value
         self._handler.setFormatter(logging.Formatter(value))
+
+    def addHandler(self, handler: Any) -> None:
+        self._logger.addHandler(handler)
+    def removeHandler(self, handler: Any) -> None:
+        self._logger.removeHandler(handler)
+    def getHandlers(self) -> list:
+        return list(self._logger.handlers)

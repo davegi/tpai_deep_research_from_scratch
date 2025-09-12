@@ -75,9 +75,9 @@
   - [x] 8.3 Render brief with rich output consistent with test snapshots
 
 - [ ] 9.0 Implement multi-agent coordination workflow demo
-  - [ ] 9.1 Demonstrate supervisor policy with deterministic steps
-  - [ ] 9.2 Log agent messages and state transitions
-  - [ ] 9.3 Align with `test_supervisor_policy*.py` expectations
+  - [x] 9.1 Demonstrate supervisor policy with deterministic steps
+  - [x] 9.2 Log agent messages and state transitions
+  - [x] 9.3 Align with `test_supervisor_policy*.py` expectations
 
 - [ ] 10.0 Add research compression and synthesis section
   - [ ] 10.1 Show compression strategy with MockLLM

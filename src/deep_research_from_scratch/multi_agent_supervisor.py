@@ -1,3 +1,4 @@
+from research_agent_framework.config import get_logger
 
 """Multi-agent supervisor for coordinating research across multiple specialized agents.
 
@@ -296,3 +297,62 @@ supervisor_builder.add_node("supervisor", supervisor)
 supervisor_builder.add_node("supervisor_tools", supervisor_tools)
 supervisor_builder.add_edge(START, "supervisor")
 supervisor_agent = supervisor_builder.compile()
+
+# === Deterministic demo classes for educational notebook and tests ===
+from typing import Sequence
+
+class AgentTask:
+    def __init__(self, agent_id: str, description: str):
+        self.agent_id = agent_id
+        self.description = description
+
+class DeterministicPolicy:
+    def decide(self, tasks: Sequence[AgentTask]):
+        # For demo: always return tasks unchanged
+        return tasks
+
+class Supervisor:
+    def __init__(self, policy=None):
+        self.policy = policy or DeterministicPolicy()
+
+    def coordinate(self, agent_tasks: Sequence[AgentTask]):
+        # For demo: each agent returns a deterministic outcome
+        results = []
+        for task in self.policy.decide(agent_tasks):
+            outcome = f"Completed: {task.description}"
+            results.append(type('Result', (), {"agent_id": task.agent_id, "outcome": outcome})())
+        return results
+
+# === Logging-enabled demo classes for notebook and tests ===
+__all__ = [
+    "Supervisor", "AgentTask", "DeterministicPolicy", "LoggingSupervisor", "LoggingAgentTask"
+]
+
+class LoggingAgentTask(AgentTask):
+    def __init__(self, agent_id: str, description: str, logger=None):
+        super().__init__(agent_id, description)
+        self.logger = logger or get_logger()
+
+    def run(self):
+        self.logger.info(f"Agent {self.agent_id} starting: {self.description}")
+        outcome = f"Completed: {self.description}"
+        self.logger.info(f"Agent {self.agent_id} finished: {outcome}")
+        return outcome
+
+class LoggingSupervisor(Supervisor):
+    def __init__(self, policy=None, logger=None):
+        super().__init__(policy=policy)
+        self.logger = logger or get_logger()
+
+    def coordinate(self, agent_tasks: Sequence[AgentTask]):
+        self.logger.info("Supervisor: Starting coordination")
+        results = []
+        for task in agent_tasks:
+            if isinstance(task, LoggingAgentTask):
+                outcome = task.run()
+            else:
+                outcome = f"Completed: {task.description}"
+            self.logger.info(f"Supervisor: Agent {task.agent_id} outcome: {outcome}")
+            results.append(type('Result', (), {"agent_id": task.agent_id, "outcome": outcome})())
+        self.logger.info("Supervisor: Coordination complete")
+        return results
