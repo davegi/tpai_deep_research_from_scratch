@@ -54,23 +54,18 @@
     - [x] 3.3 Explain configuration impact on behavior and logging (notebook includes settings table, explanatory text, and a safe reload
       demo)
 
-- [x] 4.0 Document env vars and configuration impact (adjacent to bootstrap)
-  - [x] 4.1 List required/optional env vars (e.g., SERPAPI_API_KEY, TAVILY_API_KEY)
-  - [x] 4.2 Demonstrate safe defaults and fallback behavior without keys
-  - [x] 4.3 Show how env toggles switch between mock/live providers
-
-- [ ] 5.0 Set up LLM clients with options and toggles
-  - [ ] 5.1 Present `llm_factory` usage and provider selection
-  - [ ] 5.2 Demonstrate `MockLLM` deterministic behavior
-  - [ ] 5.3 Expose temperature/max_tokens and document their impact
+- [x] 5.0 Set up LLM clients with options and toggles
+  - [x] 5.1 Present `llm_factory` usage and provider selection
+  - [x] 5.2 Demonstrate `MockLLM` deterministic behavior
+  - [x] 5.3 Expose temperature/max_tokens and document their impact
 
 - [ ] 6.0 Add mock/live provider toggles and deterministic fallbacks
-  - [ ] 6.1 Implement env-based switches for LLM and search adapters
-  - [ ] 6.2 Default to mocks; clearly label live-call cells
-  - [ ] 6.3 Include a single "switchboard" helper cell to centralize toggles
+- [x] 6.0 Add mock/live provider toggles and deterministic fallbacks
+  - [x] 6.1 Implement env-based switches for LLM and search adapters
+  - [x] 6.2 Default to mocks; clearly label live-call cells
+  - [x] 6.3 Include a single "switchboard" helper cell to centralize toggles
 
 - [ ] 7.0 Implement user clarification and scoping demo
-  - [ ] 7.1 Map to existing clarify prompt/template and tests
   - [ ] 7.2 Show iterative refinement using deterministic responses
   - [ ] 7.3 Capture scope state object and validation
 
