@@ -8,3 +8,7 @@ deep_research_from_scratch.egg-info/
 .hypothesis/
 /.coverage
 /.VSCodeCounter
+# Ignore executed notebook snapshots created during headless runs
+*.executed.ipynb
+# Also ignore any executed notebook files in notebooks/ directory
+notebooks/*.executed.ipynb
