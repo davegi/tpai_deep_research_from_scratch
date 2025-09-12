@@ -59,7 +59,6 @@
   - [x] 5.2 Demonstrate `MockLLM` deterministic behavior
   - [x] 5.3 Expose temperature/max_tokens and document their impact
 
-- [ ] 6.0 Add mock/live provider toggles and deterministic fallbacks
 - [x] 6.0 Add mock/live provider toggles and deterministic fallbacks
   - [x] 6.1 Implement env-based switches for LLM and search adapters
   - [x] 6.2 Default to mocks; clearly label live-call cells
@@ -74,15 +73,15 @@
   - [x] 8.2 Validate brief fields with assertpy
   - [x] 8.3 Render brief with rich output consistent with test snapshots
 
-- [ ] 9.0 Implement multi-agent coordination workflow demo
+- [x] 9.0 Implement multi-agent coordination workflow demo
   - [x] 9.1 Demonstrate supervisor policy with deterministic steps
   - [x] 9.2 Log agent messages and state transitions
   - [x] 9.3 Align with `test_supervisor_policy*.py` expectations
 
-- [ ] 10.0 Add research compression and synthesis section
-  - [ ] 10.1 Show compression strategy with MockLLM
-  - [ ] 10.2 Synthesize findings into structured objects
-  - [ ] 10.3 Validate synthesized outputs and display with rich
+- [x] 10.0 Add research compression and synthesis section
+  - [x] 10.1 Show compression strategy with MockLLM
+  - [x] 10.2 Synthesize findings into structured objects
+  - [x] 10.3 Validate synthesized outputs and display with rich
 
 - [ ] 11.0 Generate final report with rich output
   - [ ] 11.1 Assemble report sections and metadata

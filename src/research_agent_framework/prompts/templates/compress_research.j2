@@ -1,0 +1,26 @@
+{# Jinja2 template for compressing research findings #}
+
+"""
+Compress the following research findings and notes into a concise, comprehensive summary suitable for reporting and further synthesis.
+
+Guidelines:
+- Do NOT lose any details, facts, names, numbers, or specific findings
+- Do NOT filter out information that seems relevant to the research topic
+- Organize the information in a cleaner format but keep all the substance
+- Include ALL sources and citations found during research
+- Remember this research was conducted to answer the specific question above
+
+Today's date is {{ date }}.
+
+<Research Brief>
+{{ research_brief }}
+</Research Brief>
+
+<Findings>
+{% for note in notes %}
+- {{ note }}
+{% endfor %}
+</Findings>
+
+Please compress and synthesize the above findings into a single, well-structured summary.
+"""
