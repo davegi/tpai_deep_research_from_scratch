@@ -125,9 +125,26 @@ the `ENABLE_TRACING` environment variable or settings. When enabled, traces are 
   - [x] 16.3 Present results in a concise table
 
 - [ ] 17.0 Write troubleshooting, pitfalls, and best practices
-  - [ ] 17.1 Common setup issues and resolutions
-  - [ ] 17.2 Prompt/LLM pitfalls and mitigations
-  - [ ] 17.3 Links to deeper references
+  - [x] 17.1 Common setup issues and resolutions
+    - [x] 17.1.1 Environment not loading (missing .env, wrong path)
+    - [x] 17.1.2 Import errors (src not on PYTHONPATH/sys.path)
+    - [x] 17.1.3 Logging not stylized (Rich/Loguru misconfigured)
+    - [x] 17.1.4 Adapter keys missing (SERPAPI/TAVILY)
+    - [x] 17.1.5 Notebook kernel issues (restart, re-import)
+    - [x] 17.1.6 Add logging to each troubleshooting step
+  - [x] 17.2 Prompt/LLM pitfalls and mitigations
+    - [x] 17.2.1 Prompt ambiguity (unclear instructions)
+    - [x] 17.2.2 Overly high/low temperature settings
+    - [x] 17.2.3 Max tokens too low (truncated output)
+    - [x] 17.2.4 Provider/model mismatch
+    - [x] 17.2.5 Logging prompt, config, and output for debugging
+    - [x] 17.2.6 Add mitigation strategies and logging for each
+  - [x] 17.3 Links to deeper references
+    - [x] 17.3.1 LangChain documentation
+    - [x] 17.3.2 Pydantic settings docs
+    - [x] 17.3.3 Rich/Loguru logging docs
+    - [x] 17.3.4 Pytest best practices
+    - [x] 17.3.5 Add logging and doc links in notebook/code
 
 - [ ] 18.0 Include TDD mini-example mirroring existing tests
   - [ ] 18.1 Write assertions first, then add minimal code to pass
