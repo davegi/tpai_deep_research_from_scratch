@@ -97,15 +97,16 @@
 
 - **12.0 Logging and Tracing Integration**
 
-- Structured logging is enabled throughout the codebase and notebook using the shared logger. LangSmith tracing is optionally enabled via the
-`ENABLE_TRACING` environment variable or settings. When enabled, traces are sent to LangSmith for inspection and debugging.
-- The notebook demonstrates how to toggle tracing, and provides a link to the LangSmith UI for trace visualization. All four artifacts (notebook, code,
-tests, tasks) are in sync for logging and tracing features.
+- Structured logging is enabled throughout the codebase and notebook using the shared logger. LangSmith tracing is optionally enabled via
+the `ENABLE_TRACING` environment variable or settings. When enabled, traces are sent to LangSmith for inspection and debugging.
+- The notebook demonstrates how to toggle tracing, and provides a link to the LangSmith UI for trace visualization. All four artifacts
+(notebook, code, tests, tasks) are in sync for logging and tracing features.
 
-- [ ] 13.0 Compare prompts and LLM settings side-by-side
-  - [ ] 13.1 Vary prompts; compare outputs deterministically
-  - [ ] 13.2 Demonstrate temperature/max_tokens effects
-  - [ ] 13.3 Summarize best practices and trade-offs
+- [x] 13.0 Compare prompts and LLM settings side-by-side
+  - [x] 13.1 Vary prompts; compare outputs deterministically
+  - [x] 13.2 Demonstrate temperature/max_tokens effects
+  - [x] 13.3 Summarize best practices and trade-offs
+    - Notebook, code, and tests are in sync. See section 13.0 in the notebook for educational demonstration and logging.
 
 - [ ] 14.0 Initialize MCP server, discover and list tools (lower priority)
   - [ ] 14.1 Start simple in-process MCP stub
