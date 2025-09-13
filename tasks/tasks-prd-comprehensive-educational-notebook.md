@@ -108,10 +108,11 @@ the `ENABLE_TRACING` environment variable or settings. When enabled, traces are 
   - [x] 13.3 Summarize best practices and trade-offs
     - Notebook, code, and tests are in sync. See section 13.0 in the notebook for educational demonstration and logging.
 
-- [ ] 14.0 Initialize MCP server, discover and list tools (lower priority)
-  - [ ] 14.1 Start simple in-process MCP stub
-  - [ ] 14.2 Discover tools and enumerate capabilities
-  - [ ] 14.3 Explain async usage patterns
+- [x] 14.0 Initialize MCP server, discover and list tools (lower priority)
+  - [x] 14.1 Start simple in-process MCP stub
+  - [x] 14.2 Discover tools and enumerate capabilities
+  - [x] 14.3 Explain async usage patterns
+    - Notebook, code, and tests are in sync. See section 14.0 in the notebook for educational demonstration and logging.
 
 - [ ] 15.0 Demonstrate MCP filesystem operations and error handling
   - [ ] 15.1 Read local docs via MCP file tool
