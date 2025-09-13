@@ -119,10 +119,10 @@ the `ENABLE_TRACING` environment variable or settings. When enabled, traces are 
   - [x] 15.2 Handle expected errors and show safe patterns
   - [x] 15.3 Provide mock fallback for deterministic runs
 
-- [ ] 16.0 Benchmark mock vs live and LLM settings
-  - [ ] 16.1 Measure latency for representative steps
-  - [ ] 16.2 Compare throughput/variability under different settings
-  - [ ] 16.3 Present results in a concise table
+- [x] 16.0 Benchmark mock vs live and LLM settings
+  - [x] 16.1 Measure latency for representative steps
+  - [x] 16.2 Compare throughput/variability under different settings
+  - [x] 16.3 Present results in a concise table
 
 - [ ] 17.0 Write troubleshooting, pitfalls, and best practices
   - [ ] 17.1 Common setup issues and resolutions
