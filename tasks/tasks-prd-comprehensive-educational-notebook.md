@@ -114,7 +114,6 @@ the `ENABLE_TRACING` environment variable or settings. When enabled, traces are 
   - [x] 14.3 Explain async usage patterns
     - Notebook, code, and tests are in sync. See section 14.0 in the notebook for educational demonstration and logging.
 
-
 - [x] 15.0 Demonstrate MCP filesystem operations and error handling
   - [x] 15.1 Read local docs via MCP file tool
   - [x] 15.2 Handle expected errors and show safe patterns

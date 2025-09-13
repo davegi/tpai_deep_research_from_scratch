@@ -4,7 +4,7 @@ Encapsulates repo src path detection and sys.path setup for notebooks and script
 import sys
 from pathlib import Path
 
-def ensure_src_in_syspath():
+def ensure_src_in_sys_path():
     """Detects the repo src directory and adds it to sys.path if needed."""
     repo_cwd = Path.cwd().resolve()
     found_src = None
