@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Annotated, Dict, List, Optional, Union, Any
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import ConfigDict
 
 # Assume pydantic-extra-types and pint are available in the environment
 import pydantic_extra_types as pet
@@ -57,7 +58,7 @@ class Coordinates(BaseModel):
 	lon: float = Field(..., description="Longitude")
 
 	@field_validator("lat", "lon", mode="before")
-	def _coerce_numeric(cls, v: Any) -> Any:
+	def _coerce_numeric(cls, v: object) -> object:
 		if v is None:
 			return v
 		# Accept numeric strings
@@ -113,11 +114,13 @@ class Location(BaseModel):
 	phone: Optional[str] = Field(default=None, description="Contact phone number; normalized to E.164 when possible")
 	url: Optional[HttpUrl] = Field(default=None)
 	source: Optional[str] = Field(default=None, description="Provider/source of this location record")
-	distance: Optional[Any] = Field(default=None, description="Optional distance (may be a pint.Quantity when pint is available)")
-	raw: Dict[str, Any] = Field(default_factory=dict, description="Raw payload from the upstream adapter/provider")
+	distance: Optional[float | pint.Quantity] = Field(default=None, description="Optional distance in meters (float) or pint.Quantity if available.")
+	raw: Dict[str, object] = Field(default_factory=dict, description="Raw payload from the upstream adapter/provider")
+
+	model_config = ConfigDict(arbitrary_types_allowed=True)
 
 	@field_validator("coords", mode="before")
-	def _accept_pet_coordinate(cls, v: Any) -> Any:
+	def _accept_pet_coordinate(cls, v: object) -> object:
 		# Accept pydantic-extra-types Coordinate objects or simple mappings
 		if v is None:
 			return v
@@ -133,7 +136,7 @@ class Location(BaseModel):
 		return v
 
 	@field_validator("latitude", "longitude", mode="before")
-	def _coerce_lat_lon(cls, v: Any) -> Any:
+	def _coerce_lat_lon(cls, v: object) -> object:
 		# Accept numeric strings and coerce to float
 		if v is None:
 			return v
@@ -148,7 +151,7 @@ class Location(BaseModel):
 		return v
 
 	@field_validator("phone", mode="before")
-	def _normalize_phone(cls, v: Any) -> Any:
+	def _normalize_phone(cls, v: object) -> Optional[str]:
 		if v is None:
 			return v
 		# Accept phone-like objects (duck-typed) and coerce to string
@@ -161,7 +164,7 @@ class Location(BaseModel):
 		return str(v)
 
 	@field_validator("distance", mode="before")
-	def _normalize_distance(cls, v: Any) -> Any:
+	def _normalize_distance(cls, v: object) -> object:
 		if v is None:
 			return v
 		# If pint is available, prefer returning a pint.Quantity
@@ -190,19 +193,19 @@ class Location(BaseModel):
 		raise ValueError("unsupported distance type")
 
 	@field_validator("coords", mode="after")
-	def _build_coords_from_lat_lon(cls, v: Any, info: Any) -> Any:
+	def _build_coords_from_lat_lon(cls, v: object, info: object) -> object:
 		# If coords were provided as dict (from earlier coercion), build Coordinates
 		if isinstance(v, dict) and "lat" in v and "lon" in v:
 			return Coordinates(lat=v["lat"], lon=v["lon"])
 		return v
 
 	@field_validator("coords", "latitude", "longitude", mode="after")
-	def _ensure_coords_consistency(cls, v: Any, info: Any) -> Any:
+	def _ensure_coords_consistency(cls, v: object, info: object) -> object:
 		# This validator is intentionally simple; cross-field composition happens in model_validator.
 		return v
 
 	@classmethod
-	def model_validate(cls, data: Any) -> "Location":
+	def model_validate(cls, data: object) -> "Location":
 		# Use pydantic's default model_validate but add cross-field logic: if latitude/longitude provided
 		# and coords is missing, construct coords.
 		if isinstance(data, dict) and ("latitude" in data or "longitude" in data):
