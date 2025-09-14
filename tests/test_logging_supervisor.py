@@ -25,13 +25,14 @@ def test_logging_supervisor_and_agents_logs_messages(monkeypatch):
     logger.removeHandler(handler)
     log_output = log_stream.getvalue()
 
+    from assertpy import assert_that
     # Assert log output contains expected messages
-    assert "Supervisor: Starting coordination" in log_output
+    assert_that(log_output, description="Log should contain supervisor start message").contains("Supervisor: Starting coordination")
     for task in agent_tasks:
-        assert f"Agent {task.agent_id} starting: {task.description}" in log_output
-        assert f"Agent {task.agent_id} finished: Completed: {task.description}" in log_output
-        assert f"Supervisor: Agent {task.agent_id} outcome: Completed: {task.description}" in log_output
-    assert "Supervisor: Coordination complete" in log_output
+        assert_that(log_output, description=f"Log should contain agent {task.agent_id} start message").contains(f"Agent {task.agent_id} starting: {task.description}")
+        assert_that(log_output, description=f"Log should contain agent {task.agent_id} finished message").contains(f"Agent {task.agent_id} finished: Completed: {task.description}")
+        assert_that(log_output, description=f"Log should contain supervisor outcome for agent {task.agent_id}").contains(f"Supervisor: Agent {task.agent_id} outcome: Completed: {task.description}")
+    assert_that(log_output, description="Log should contain supervisor coordination complete message").contains("Supervisor: Coordination complete")
 
     # Optionally, print results for manual inspection
     for result in results:

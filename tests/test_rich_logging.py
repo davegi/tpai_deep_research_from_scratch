@@ -13,8 +13,9 @@ def test_rich_handler_std_logging(capsys):
     std_logger.warning("[std] Warning message")
     # Capture output and check for message presence
     out = capsys.readouterr().out
-    assert "Info message" in out
-    assert "Warning message" in out
+    from assertpy import assert_that
+    assert_that("Info message" in out, description="Std logger output should contain 'Info message'").is_true()
+    assert_that("Warning message" in out, description="Std logger output should contain 'Warning message'").is_true()
     # Color codes may not appear in non-terminal test output; skip that assertion
 
 def test_loguru_rich_sink(capsys):
@@ -37,6 +38,7 @@ def test_loguru_rich_sink(capsys):
     loguru_logger.info("[loguru] Info message")
     loguru_logger.warning("[loguru] Warning message")
     out = capsys.readouterr().out
-    assert "Info message" in out
-    assert "Warning message" in out
+    from assertpy import assert_that
+    assert_that("Info message" in out, description="Loguru output should contain 'Info message'").is_true()
+    assert_that("Warning message" in out, description="Loguru output should contain 'Warning message'").is_true()
     # Color codes may not appear in non-terminal test output; skip that assertion

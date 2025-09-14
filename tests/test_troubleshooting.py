@@ -11,28 +11,34 @@ from research_agent_framework.troubleshooting import (
 def test_log_env_reload():
     os.environ['MODEL_NAME'] = 'mock-model-test'
     settings = log_env_reload()
-    assert settings.model_name == 'mock-model-test'
+    from assertpy import assert_that
+    assert_that(settings.model_name, description="log_env_reload should set model_name to 'mock-model-test'").is_equal_to('mock-model-test')
 
 def test_log_import_error(caplog):
     log_import_error()
-    assert any('Import error' in r for r in caplog.text.splitlines())
+    from assertpy import assert_that
+    assert_that(any('Import error' in r for r in caplog.text.splitlines()), description="Log should contain 'Import error'").is_true()
 
 def test_log_rich_logging_enabled(caplog):
     log_rich_logging_enabled()
-    assert any('Rich logging enabled' in r for r in caplog.text.splitlines())
+    from assertpy import assert_that
+    assert_that(any('Rich logging enabled' in r for r in caplog.text.splitlines()), description="Log should contain 'Rich logging enabled'").is_true()
 
 def test_log_adapter_key_missing(caplog):
     log_adapter_key_missing('SERPAPI')
-    assert any('Adapter API key missing' in r for r in caplog.text.splitlines())
+    from assertpy import assert_that
+    assert_that(any('Adapter API key missing' in r for r in caplog.text.splitlines()), description="Log should contain 'Adapter API key missing'").is_true()
 
 def test_log_kernel_restart(caplog):
     log_kernel_restart()
-    assert any('Kernel restarted' in r for r in caplog.text.splitlines())
+    from assertpy import assert_that
+    assert_that(any('Kernel restarted' in r for r in caplog.text.splitlines()), description="Log should contain 'Kernel restarted'").is_true()
 
 def test_check_adapter_keys(monkeypatch, caplog):
     monkeypatch.delenv('SERPAPI_API_KEY', raising=False)
     monkeypatch.delenv('TAVILY_API_KEY', raising=False)
     serpapi, tavily = check_adapter_keys()
-    assert serpapi is None and tavily is None
-    assert 'Adapter API key missing for SERPAPI' in caplog.text
-    assert 'Adapter API key missing for TAVILY' in caplog.text
+    from assertpy import assert_that
+    assert_that(serpapi is None and tavily is None, description="Both adapter keys should be None when not set").is_true()
+    assert_that('Adapter API key missing for SERPAPI' in caplog.text, description="Log should contain missing SERPAPI key message").is_true()
+    assert_that('Adapter API key missing for TAVILY' in caplog.text, description="Log should contain missing TAVILY key message").is_true()

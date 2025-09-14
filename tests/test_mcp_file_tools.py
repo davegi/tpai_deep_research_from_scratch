@@ -9,18 +9,21 @@ def test_read_file_success(tmp_path):
     file_path.write_text("Hello World!", encoding="utf-8")
     tool = MCPFileTool(logger)
     result = tool.read_file(str(file_path))
-    assert result == "Hello World!"
+    from assertpy import assert_that
+    assert_that(result, description="File read should return correct content").is_equal_to("Hello World!")
 
 def test_read_file_not_found(tmp_path):
     logger = get_logger()
     tool = MCPFileTool(logger)
     result = tool.read_file(str(tmp_path / "missing.txt"))
-    assert result is None
+    from assertpy import assert_that
+    assert_that(result, description="File read should return None for missing file").is_none()
 
 def test_read_file_mock_mode():
     logger = get_logger()
     tool = MCPFileTool(logger, mock_mode=True)
     result = tool.read_file("/fake/path/to/file.txt")
-    assert result is not None
-    assert result.startswith("[MOCK CONTENT]")
-    assert "file.txt" in result
+    from assertpy import assert_that
+    assert_that(result, description="Mock mode should return non-None content").is_not_none()
+    assert_that(result, description="Mock mode should return content starting with '[MOCK CONTENT]'").starts_with("[MOCK CONTENT]")
+    assert_that(result, description="Mock mode content should contain filename").contains("file.txt")

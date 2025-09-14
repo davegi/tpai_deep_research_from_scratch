@@ -15,8 +15,9 @@ def test_throughput_outputs_are_strings():
     with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     for config, stats in data.items():
+        from assertpy import assert_that
         for output in stats['outputs']:
-            assert isinstance(output, str), f"Output for {config} is not a string: {output}"
+            assert_that(output, description=f"Output for {config} should be a string").is_instance_of(str)
     logger.info("All outputs are strings.")
 
 @pytest.mark.skipif(
@@ -28,9 +29,11 @@ def test_throughput_unique_outputs_count():
     logger.info(f"Testing unique outputs count in {path}")
     with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
+    from assertpy import assert_that
     for config, stats in data.items():
         unique = set(stats['outputs'])
-        assert stats['unique_outputs'] == len(unique), f"Unique outputs count mismatch for {config}"
+        assert_that(stats['unique_outputs'], description=f"Unique outputs count mismatch for {config}") \
+            .is_equal_to(len(unique))
     logger.info("Unique outputs count matches.")
 
 @pytest.mark.skipif(
@@ -43,6 +46,7 @@ def test_throughput_no_coroutine_outputs():
     with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     for config, stats in data.items():
+        from assertpy import assert_that
         for output in stats['outputs']:
-            assert not output.startswith('<coroutine'), f"Coroutine object found in outputs for {config}: {output}"
+            assert_that(output.startswith('<coroutine'), description=f"Coroutine object found in outputs for {config}: {output}").is_false()
     logger.info("No coroutine objects found in outputs.")

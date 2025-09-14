@@ -147,9 +147,9 @@ the `ENABLE_TRACING` environment variable or settings. When enabled, traces are 
     - [x] 17.3.5 Add logging and doc links in notebook/code
 
    [x] 18.0 Include TDD mini-example mirroring existing tests
-    - [x] 18.1 Write assertions first, then add minimal code to pass
-    - [x] 18.2 Show test-driven loop in notebook
-    - [x] 18.3 Map to actual pytest in repo
+  - [x] 18.1 Write assertions first, then add minimal code to pass
+  - [x] 18.2 Show test-driven loop in notebook
+  - [x] 18.3 Map to actual pytest in repo
 
 - [ ] 19.0 Final review against PRD success metrics
   - [ ] 19.1 Verify educational coverage and clarity

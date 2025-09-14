@@ -9,4 +9,5 @@ def test_get_settings_reads_env_var(tmp_path, monkeypatch):
     monkeypatch.setenv("MODEL_NAME", "test-model-from-env")
 
     s = get_settings(force_reload=True)
-    assert s.model_name == "test-model-from-env"
+    from assertpy import assert_that
+    assert_that(s.model_name, description="MODEL_NAME env var should be read by get_settings").is_equal_to("test-model-from-env")

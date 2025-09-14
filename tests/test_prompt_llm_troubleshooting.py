@@ -9,22 +9,27 @@ from research_agent_framework.prompt_llm_troubleshooting import (
 
 def test_log_prompt_ambiguity(caplog):
     log_prompt_ambiguity()
-    assert 'Prompt ambiguity detected' in caplog.text
+    from assertpy import assert_that
+    assert_that('Prompt ambiguity detected' in caplog.text, description="Log should contain 'Prompt ambiguity detected'").is_true()
 
 def test_log_temperature_setting(caplog):
     log_temperature_setting()
-    assert 'Temperature set to' in caplog.text
+    from assertpy import assert_that
+    assert_that('Temperature set to' in caplog.text, description="Log should contain 'Temperature set to'").is_true()
 
 def test_log_output_truncated(caplog):
     log_output_truncated()
-    assert 'Output truncated' in caplog.text
+    from assertpy import assert_that
+    assert_that('Output truncated' in caplog.text, description="Log should contain 'Output truncated'").is_true()
 
 def test_log_provider_model_mismatch(caplog):
     log_provider_model_mismatch()
-    assert 'Provider/model mismatch' in caplog.text
+    from assertpy import assert_that
+    assert_that('Provider/model mismatch' in caplog.text, description="Log should contain 'Provider/model mismatch'").is_true()
 
 def test_log_prompt_config_output(caplog):
     log_prompt_config_output('Test prompt', {'temp': 0.5}, 'Test output')
-    assert 'Prompt: Test prompt' in caplog.text
-    assert 'Config: {\'temp\': 0.5}' in caplog.text
-    assert 'Output: Test output' in caplog.text
+    from assertpy import assert_that
+    assert_that('Prompt: Test prompt' in caplog.text, description="Log should contain 'Prompt: Test prompt'").is_true()
+    assert_that("Config: {'temp': 0.5}" in caplog.text, description="Log should contain 'Config: {\'temp\': 0.5}'").is_true()
+    assert_that('Output: Test output' in caplog.text, description="Log should contain 'Output: Test output'").is_true()

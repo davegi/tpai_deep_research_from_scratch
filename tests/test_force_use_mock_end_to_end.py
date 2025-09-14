@@ -25,8 +25,9 @@ def test_force_use_mock_for_adapters_and_llm(monkeypatch):
 
     serp = from_raw_adapter({}, provider=serp_provider)
     tav = from_raw_adapter({}, provider=tav_provider)
-    assert serp.__class__.__name__.lower().startswith("mock")
-    assert tav.__class__.__name__.lower().startswith("mock")
+    from assertpy import assert_that
+    assert_that(serp.__class__.__name__.lower().startswith("mock"), description="SERP adapter should be a mock").is_true()
+    assert_that(tav.__class__.__name__.lower().startswith("mock"), description="TAV adapter should be a mock").is_true()
 
     # LLM factory should follow switchboard decision
     cfg = LLMConfig(api_key=s.llm_api_key or "", model=s.model_name or "mock-model", temperature=s.model_temperature)
@@ -35,7 +36,7 @@ def test_force_use_mock_for_adapters_and_llm(monkeypatch):
         llm = llm_factory(provider or "mock", cfg)
     except Exception:
         llm = MockLLM(cfg)
-    assert isinstance(llm, MockLLM)
+    assert_that(llm, description="LLM instance should be MockLLM").is_instance_of(MockLLM)
 
     # Clean up
     monkeypatch.delenv("FORCE_USE_MOCK", raising=False)

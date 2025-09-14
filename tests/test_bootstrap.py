@@ -176,19 +176,24 @@ def test_bootstrap_env_read(tmp_path):
             def assert_that(x):
                 class A:
                     def is_equal_to(self, y):
-                        assert x == y
+                        if x != y:
+                            raise AssertionError(f"Expected {x!r} to be equal to {y!r}")
 
                     def is_true(self):
-                        assert x
+                        if not x:
+                            raise AssertionError(f"Expected {x!r} to be truthy")
 
                     def is_instance_of(self, t):
-                        assert isinstance(x, t)
+                        if not isinstance(x, t):
+                            raise AssertionError(f"Expected {x!r} to be instance of {t!r}")
 
                     def is_not_none(self):
-                        assert x is not None
+                        if x is None:
+                            raise AssertionError(f"Expected value to not be None")
 
                     def contains(self, v):
-                        assert v in x
+                        if v not in x:
+                            raise AssertionError(f"Expected {x!r} to contain {v!r}")
 
                 return A()
             """

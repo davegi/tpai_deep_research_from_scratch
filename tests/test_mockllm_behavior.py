@@ -13,4 +13,5 @@ def test_mockllm_generate_is_deterministic():
         return r1, r2
 
     r1, r2 = asyncio.run(run())
-    assert r1 == r2
+    from assertpy import assert_that
+    assert_that(r1, description="MockLLM.generate should be deterministic for same input").is_equal_to(r2)
